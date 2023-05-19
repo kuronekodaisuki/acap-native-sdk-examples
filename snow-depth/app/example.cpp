@@ -19,7 +19,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/video.hpp>
 
-#include "imgprovider.h"
+#include "ImageProvider.hpp"
 
 using namespace cv;
 
