@@ -110,7 +110,7 @@ bool ImageProvider::allocateVdoBuffers()
     GError* error = NULL;
     bool ret = false;
 
-    for (size_t i = 0; i < NUM_VDO_BUFFERS; i++) 
+    for (size_t i = 0; i < NUM_VDO_BUFFERS; i++)
     {
         vdoBuffers[i] = vdo_stream_buffer_alloc(vdoStream, NULL, &error);
         if (vdoBuffers[i] == NULL) {
@@ -139,16 +139,85 @@ bool ImageProvider::allocateVdoBuffers()
     return true;
 }
 
-void ImageProvider::releaseVdoBuffers() 
+void ImageProvider::releaseVdoBuffers()
 {
     if (vdoStream)
     {
-        for (size_t i = 0; i < NUM_VDO_BUFFERS; i++) 
+        for (size_t i = 0; i < NUM_VDO_BUFFERS; i++)
         {
-            if (vdoBuffers[i] != NULL) 
+            if (vdoBuffers[i] != NULL)
             {
                 vdo_stream_buffer_unref(vdoStream, &vdoBuffers[i], NULL);
             }
         }
     }
+}
+
+bool ImageProvider::chooseStreamResolution(unsigned int reqWidth, unsigned int reqHeight,
+                            unsigned int* chosenWidth,
+                            unsigned int* chosenHeight)
+{
+    VdoResolutionSet* set = NULL;
+    VdoChannel* channel = NULL;
+    GError* error = NULL;
+    bool ret = false;
+
+    assert(chosenWidth);
+    assert(chosenHeight);
+
+    // Retrieve channel resolutions
+    channel = vdo_channel_get(VDO_CHANNEL, &error);
+    if (!channel) {
+        syslog(LOG_ERR, "%s: Failed vdo_channel_get(): %s", __func__,
+                 (error != NULL) ? error->message : "N/A");
+    g_clear_object(&channel);
+    g_free(set);
+    g_clear_error(&error);
+    }
+    // We filter on resolutions that are supported for VDO_FORMAT_YUV
+    g_autoptr(VdoMap) filter = vdo_map_new();
+    vdo_map_set_uint32(filter, "format", VDO_FORMAT_YUV);
+    vdo_map_set_string(filter, "select", "all");
+    set = vdo_channel_get_resolutions(channel, filter, &error);
+    if (!set) {
+        syslog(LOG_ERR, "%s: Failed vdo_channel_get_resolutions(): %s", __func__,
+                 (error != NULL) ? error->message : "N/A");
+    g_clear_object(&channel);
+    g_free(set);
+    g_clear_error(&error);
+    }
+
+    // Find smallest VDO stream resolution that fits the requested size.
+    ssize_t bestResolutionIdx = -1;
+    unsigned int bestResolutionArea = UINT_MAX;
+    for (ssize_t i = 0; (gsize) i < set->count; ++i) {
+        VdoResolution* res = &set->resolutions[i];
+        if ((res->width >= reqWidth) && (res->height >= reqHeight)) {
+            unsigned int area = res->width * res->height;
+            if (area < bestResolutionArea) {
+                bestResolutionIdx = i;
+                bestResolutionArea = area;
+            }
+        }
+    }
+
+    // If we got a reasonable w/h from the VDO channel info we use that
+    // for creating the stream. If that info for some reason was empty we
+    // fall back to trying to create a stream with client-supplied w/h.
+    *chosenWidth = reqWidth;
+    *chosenWidth = reqHeight;
+    if (bestResolutionIdx >= 0) {
+        *chosenWidth = set->resolutions[bestResolutionIdx].width;
+        *chosenHeight = set->resolutions[bestResolutionIdx].height;
+        syslog(LOG_INFO, "%s: We select stream w/h=%u x %u based on VDO channel info.\n",
+                __func__, *chosenWidth, *chosenHeight);
+    } else {
+        syslog(LOG_WARNING, "%s: VDO channel info contains no reslution info. Fallback "
+                   "to client-requested stream resolution.",
+                   __func__);
+    }
+
+    ret = true;
+
+    return ret;
 }

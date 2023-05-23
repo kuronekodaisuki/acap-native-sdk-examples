@@ -21,7 +21,7 @@ public:
     VdoBuffer* Get();
     void Put(VdoBuffer* buffer);
 
-    bool chooseStreamResolution(unsigned int reqWidth, unsigned int reqHeight,
+    static bool chooseStreamResolution(unsigned int reqWidth, unsigned int reqHeight,
                             unsigned int* chosenWidth,
                             unsigned int* chosenHeight);
 
