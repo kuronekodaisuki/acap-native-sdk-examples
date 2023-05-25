@@ -18,6 +18,7 @@ ARG BUILD_DIR=/opt/build
 # Install build dependencies for cross compiling OpenCV
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update && apt-get install -y -f --no-install-recommends \
+    libcairomm-1.0-dev \
     cmake && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -31,6 +32,9 @@ ARG OPENCV_DIR=${BUILD_DIR}/opencv
 ARG OPENCV_SRC_DIR=${OPENCV_DIR}/opencv-${OPENCV_VERSION}
 ARG OPENCV_BUILD_DIR=${OPENCV_DIR}/build
 
+#
+# OpenCV aruco module
+#
 COPY aruco ${OPENCV_SRC_DIR}/modules/aruco
 
 WORKDIR ${OPENCV_DIR}

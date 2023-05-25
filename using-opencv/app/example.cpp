@@ -19,6 +19,9 @@
 #include <opencv2/aruco.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/video.hpp>
+#include <glib.h>
+#include <cairo/cairo.h>
+#include <axoverlay.h>
 
 #include "imgprovider.h"
 
