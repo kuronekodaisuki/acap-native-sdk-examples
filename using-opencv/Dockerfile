@@ -31,9 +31,12 @@ ARG OPENCV_DIR=${BUILD_DIR}/opencv
 ARG OPENCV_SRC_DIR=${OPENCV_DIR}/opencv-${OPENCV_VERSION}
 ARG OPENCV_BUILD_DIR=${OPENCV_DIR}/build
 
+COPY aruco ${OPENCV_SRC_DIR}/modules/aruco
+
 WORKDIR ${OPENCV_DIR}
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://github.com/opencv/opencv/archive/$OPENCV_VERSION.tar.gz | tar -xz
+
 
 WORKDIR ${OPENCV_BUILD_DIR}
 ENV COMMON_CMAKE_FLAGS="-S $OPENCV_SRC_DIR \
@@ -46,7 +49,7 @@ ENV COMMON_CMAKE_FLAGS="-S $OPENCV_SRC_DIR \
         -D WITH_FFMPEG=OFF \
         -D WITH_GSTREAMER=OFF \
         -D WITH_GSTREAMER_0_10=OFF \
-        -D BUILD_LIST=calib3d,core,features2d,flann,imgproc,video \
+        -D BUILD_LIST=aruco,calib3d,core,features2d,flann,imgproc,video \
         -D BUILD_EXAMPLES=OFF \
         -D BUILD_OPENCV_APPS=OFF \
         -D BUILD_DOCS=OFF \

@@ -16,6 +16,7 @@
 
 #include <stdlib.h>
 #include <syslog.h>
+#include <opencv2/aruco.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/video.hpp>
 
@@ -69,6 +70,10 @@ int main(int argc, char* argv[]) {
   Mat nv12_mat = Mat(height * 3 / 2, width, CV_8UC1);
   Mat fg;
 
+  Ptr<aruco::Dictionary> dictionary = aruco::getPredefinedDictionary(aruco::DICT_6X6_100);
+  std::vector<int> markerIds;
+  std::vector<std::vector<Point2f>> markerCorners;
+
   while (true) {
     // Get the latest NV12 image frame from VDO using the imageprovider
     VdoBuffer* buf = getLastFrameBlocking(provider);
@@ -85,21 +90,32 @@ int main(int argc, char* argv[]) {
     // Convert the NV12 data to BGR
     cvtColor(nv12_mat, bgr_mat, COLOR_YUV2BGR_NV12, 3);
 
+    aruco::detectMarkers(bgr_mat, dictionary, markerCorners, markerIds);
+    aruco::drawDetectedMarkers(bgr_mat, markerCorners);
+    if (0 < markerIds.size())
+    {
+      syslog(LOG_INFO, "%d Detect", markerIds[0]);
+    }
+    else
+    {
+      syslog(LOG_ERR, "Not Detected");
+    }
+
     // Perform background subtraction on the bgr image with
     // learning rate 0.005. The resulting image should have
     // pixel intensities > 0 only where changes have occurred
-    bgsub->apply(bgr_mat, fg, 0.005);
+    //bgsub->apply(bgr_mat, fg, 0.005);
 
     // Filter noise from the image with the filtering element
-    morphologyEx(fg, fg, MORPH_OPEN, kernel);
+    //morphologyEx(fg, fg, MORPH_OPEN, kernel);
 
     // We define movement in the image as any pixel being non-zero
-    int nonzero_pixels = countNonZero(fg);
-    if (nonzero_pixels > 0) {
-      syslog(LOG_INFO, "Motion detected: YES");
-    } else {
-      syslog(LOG_INFO, "Motion detected: NO");
-    }
+    //int nonzero_pixels = countNonZero(fg);
+    //if (nonzero_pixels > 0) {
+    //  syslog(LOG_INFO, "Motion detected: YES");
+    //} else {
+    //  syslog(LOG_INFO, "Motion detected: NO");
+    //}
 
     // Release the VDO frame buffer
     returnFrame(provider, buf);
