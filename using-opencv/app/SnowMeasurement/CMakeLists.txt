@@ -20,5 +20,11 @@ target_include_directories(SnowMeasurement PUBLIC
 
 target_link_libraries(SnowMeasurement PUBLIC
 	${OPENCV_LIBRARIES}
+    opencv_aruco
+    opencv_calib3d
+    opencv_core
+    opencv_features2d
+    opencv_flann
+    opencv_video
 	#Eigen3::Eigen
 	)
