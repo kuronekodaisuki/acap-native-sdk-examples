@@ -1,24 +1,23 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(SnowMeasurement DESCRIPTION "Snow measurement test with OpenCV")
+project(SnowDepth DESCRIPTION "Snow measurement test with OpenCV")
 
-add_library(SnowMeasurement STATIC
+add_library(SnowDepth STATIC
 	RotateAndCrop.cpp
 	SnowMeasurement.cpp
 	SnowDepth.cpp
 	MovingAvg.cpp
-	)
+)
 
-#find_package(OpenCV REQUIRED)
 #find_package(Eigen3 REQUIRED)
 
-target_include_directories(SnowMeasurement PUBLIC
+target_include_directories(SnowDepth PUBLIC
 	${OPENCV_INCLUDE_DIR}
-	#${Eigen3_INCLUDE_DIRS}
 	PUBLIC ${PROJECT_SOURCE_DIR}
-	)
+	#${Eigen3_INCLUDE_DIRS}
+)
 
-target_link_libraries(SnowMeasurement PUBLIC
+target_link_libraries(SnowDepth PUBLIC
 	${OPENCV_LIBRARIES}
     opencv_aruco
     opencv_calib3d
@@ -27,4 +26,4 @@ target_link_libraries(SnowMeasurement PUBLIC
     opencv_flann
     opencv_video
 	#Eigen3::Eigen
-	)
+)
