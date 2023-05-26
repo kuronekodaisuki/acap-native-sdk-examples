@@ -13,12 +13,12 @@ add_library(SnowMeasurement STATIC
 #find_package(Eigen3 REQUIRED)
 
 target_include_directories(SnowMeasurement PUBLIC
-	#${OpenCV_INCLUDE_DIRS}
+	${OPENCV_INCLUDE_DIR}
 	#${Eigen3_INCLUDE_DIRS}
 	PUBLIC ${PROJECT_SOURCE_DIR}
 	)
 
 target_link_libraries(SnowMeasurement PUBLIC
-	#${OpenCV_LIBRARIES}
+	${OPENCV_LIBRARIES}
 	#Eigen3::Eigen
 	)

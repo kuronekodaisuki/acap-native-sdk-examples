@@ -118,17 +118,16 @@ WORKDIR /opt/app/SnowMeasurement
 RUN . /opt/axis/acapsdk/environment-setup* && \
     cmake \
         -D CMAKE_CXX_COMPILER=${CXX%-g++*}-g++ \
-        #-D CMAKE_CXX_FLAGS="${CXX#*-g++}" \
+        -D CMAKE_CXX_FLAGS="${CXX#*-g++}" \
         -D CMAKE_C_COMPILER=${CC%-gcc*}-gcc \
-        #-D CMAKE_C_FLAGS="${CC#*-gcc}" \
-        #S-D CMAKE_TOOLCHAIN_FILE=${OPENCV_SRC_DIR}/platforms/linux/arm-gnueabi.toolchain.cmake \
-        #-D CPU_BASELINE=NEON,VFPV3 \
-        #-D ENABLE_NEON=ON \
-        #-D ENABLE_VFPV3=ON \
+        -D CMAKE_C_FLAGS="${CC#*-gcc}" \
+        -D OPENCV_INCLUDE_DIR=$SDK_LIB_PATH_BASE/include/opencv4 \
+        -D OPENCV_LIBRARIES=$SDK_LIB_PATH_BASE/lib \
         .
-        #$COMMON_CMAKE_FLAGS && \
-        # Build
-        #make -j 8;
+
+# Build
+#RUN ls $SDK_LIB_PATH_BASE/include/opencv4/opencv2;
+RUN make -j 8;
 
 
 
