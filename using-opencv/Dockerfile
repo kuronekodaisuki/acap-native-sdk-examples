@@ -19,6 +19,7 @@ ARG BUILD_DIR=/opt/build
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update && apt-get install -y -f --no-install-recommends \
     libcairomm-1.0-dev \
+    #libeigen3-dev \
     cmake && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -106,11 +107,35 @@ RUN if [ "$ARCH" = armv7hf ]; then \
 
 WORKDIR /opt/app
 COPY ./app .
+
 RUN mkdir lib && \
     cp -P ${OPENCV_BUILD_DIR}/lib/lib*.so* ./lib/
+
+WORKDIR /opt/app/SnowMeasurement
+#
+# build SnowMeasurement library
+#
+RUN . /opt/axis/acapsdk/environment-setup* && \
+    cmake \
+        -D CMAKE_CXX_COMPILER=${CXX%-g++*}-g++ \
+        #-D CMAKE_CXX_FLAGS="${CXX#*-g++}" \
+        -D CMAKE_C_COMPILER=${CC%-gcc*}-gcc \
+        #-D CMAKE_C_FLAGS="${CC#*-gcc}" \
+        #S-D CMAKE_TOOLCHAIN_FILE=${OPENCV_SRC_DIR}/platforms/linux/arm-gnueabi.toolchain.cmake \
+        #-D CPU_BASELINE=NEON,VFPV3 \
+        #-D ENABLE_NEON=ON \
+        #-D ENABLE_VFPV3=ON \
+        .
+        #$COMMON_CMAKE_FLAGS && \
+        # Build
+        #make -j 8;
+
+
+
 
 #-------------------------------------------------------------------------------
 # Finally build the ACAP application
 #-------------------------------------------------------------------------------
+WORKDIR /opt/app
 
 RUN . /opt/axis/acapsdk/environment-setup* && acap-build .
