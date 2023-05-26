@@ -125,11 +125,12 @@ RUN . /opt/axis/acapsdk/environment-setup* && \
         -D OPENCV_LIBRARIES=$SDK_LIB_PATH_BASE/lib \
         .
 
+#
 # Build
-#RUN ls $SDK_LIB_PATH_BASE/include/opencv4/opencv2;
+#
 RUN make -j 8;
-#RUN ls;
 RUN cp *.a ../lib/
+
 #-------------------------------------------------------------------------------
 # Finally build the ACAP application
 #-------------------------------------------------------------------------------

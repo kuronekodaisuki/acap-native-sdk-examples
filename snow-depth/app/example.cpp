@@ -19,14 +19,19 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/video.hpp>
 
+#include "SnowMeasurement/SnowMeasurement.h"
 #include "ImageProvider.hpp"
 
 using namespace cv;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
   openlog("opencv_app", LOG_PID|LOG_CONS, LOG_USER);
   syslog(LOG_INFO, "Running OpenCV example with VDO as video source");
   ImgProvider_t* provider = NULL;
+
+	// マーカーサイズ40センチ、ポール長さ24メートル
+	SnowDetector detector(SnowDetector::MARKER_6X6, 0.4f, 2.75f);
 
   // The desired width and height of the BGR frame
   unsigned int width = 1024;
