@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 
 project(SnowDepth DESCRIPTION "Snow measurement test with OpenCV")
 
-add_library(SnowDepth STATIC
+add_library(SnowDepth SHARED
 	RotateAndCrop.cpp
 	SnowMeasurement.cpp
 	SnowDepth.cpp

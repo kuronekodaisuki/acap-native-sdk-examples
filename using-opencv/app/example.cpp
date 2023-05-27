@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
   syslog(LOG_INFO, "Running OpenCV example with VDO as video source");
   ImgProvider_t* provider = NULL;
 
-  /*
+
 	// マーカーサイズ40センチ、ポール長さ24メートル
 	SnowDetector detector(SnowDetector::MARKER_6X6, 0.4f, 2.75f);
 
@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
   {
     syslog(LOG_INFO, "No camera parameter file");
   }
-  */
+
 
   // The desired width and height of the BGR frame
   unsigned int width = 1024;

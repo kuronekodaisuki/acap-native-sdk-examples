@@ -129,7 +129,7 @@ RUN . /opt/axis/acapsdk/environment-setup* && \
 # Build
 #
 RUN make -j 8;
-RUN cp *.a ../lib/
+RUN cp lib*.* ../lib/
 
 #-------------------------------------------------------------------------------
 # Finally build the ACAP application
