@@ -23,14 +23,33 @@
 #include <cairo/cairo.h>
 #include <axoverlay.h>
 
+#include "SnowMeasurement/SnowMeasurement.h"
 #include "imgprovider.h"
 
 using namespace cv;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
   openlog("opencv_app", LOG_PID|LOG_CONS, LOG_USER);
   syslog(LOG_INFO, "Running OpenCV example with VDO as video source");
   ImgProvider_t* provider = NULL;
+
+  /*
+	// マーカーサイズ40センチ、ポール長さ24メートル
+	SnowDetector detector(SnowDetector::MARKER_6X6, 0.4f, 2.75f);
+
+  if (2 <= argc)
+  {
+    if (detector.LoadCameraParameters(argv[1]))
+      syslog(LOG_INFO, "%s loaded", argv[1]);
+    else
+      syslog(LOG_ERR, "%s failed to load", argv[1]);
+  }
+  else
+  {
+    syslog(LOG_INFO, "No camera parameter file");
+  }
+  */
 
   // The desired width and height of the BGR frame
   unsigned int width = 1024;

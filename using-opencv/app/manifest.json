@@ -10,6 +10,7 @@
                 "group": "sdk",
                 "username": "sdk"
             },
+            "runOptions": "config/AXIS_Q6215-LE.xml",
             "vendorUrl": "https://www.axis.com",
             "runMode": "never",
             "version": "1.0.0"
