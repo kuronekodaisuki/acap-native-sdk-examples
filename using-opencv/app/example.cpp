@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 
   std::string path = "/usr/local/packages/opencv_app";
   for (const auto& entry: fs::directory_iterator(path))
-    syslog(LOG_INFO, "%s", entry.path());
+    syslog(LOG_INFO, "%s", entry.path().c_str());
 
   /*
   DIR* dir;
