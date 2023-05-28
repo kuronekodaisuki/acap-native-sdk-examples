@@ -15,6 +15,10 @@
  */
 
 #include <stdlib.h>
+#include <iostream>
+#include <filesystem>
+#include <unistd.h>
+
 #include <syslog.h>
 #include <opencv2/aruco.hpp>
 #include <opencv2/imgproc.hpp>
@@ -27,6 +31,7 @@
 #include "imgprovider.h"
 
 using namespace cv;
+namespace fs = std::filesystem;
 
 int main(int argc, char* argv[])
 {
@@ -34,6 +39,24 @@ int main(int argc, char* argv[])
   syslog(LOG_INFO, "Running OpenCV example with VDO as video source");
   ImgProvider_t* provider = NULL;
 
+  syslog(LOG_INFO, "%s", argv[0]);
+
+  std::string path = "/usr/local/packages/opencv_app";
+  for (const auto& entry: fs::directory_iterator(path))
+    syslog(LOG_INFO, "%s", entry.path());
+
+  /*
+  DIR* dir;
+  if (NULL != (dir = opendir("/usr/local/packages/opencv_app/config")))
+  {
+    struct dirent* ent;
+    while(NULL != (ent = readdir(dir)))
+    {
+      syslog(LOG_INFO, ent->d_name);
+    }
+    closedir(dir);
+  };
+  */
 
 	// マーカーサイズ40センチ、ポール長さ24メートル
 	SnowDetector detector(SnowDetector::MARKER_6X6, 0.4f, 2.75f);

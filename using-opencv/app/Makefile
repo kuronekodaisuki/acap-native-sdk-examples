@@ -3,7 +3,7 @@ OBJECTS = $(wildcard *.cpp)
 
 PKGS = gio-2.0 gio-unix-2.0 vdostream
 
-CXXFLAGS += -Os -pipe -std=c++11
+CXXFLAGS += -Os -pipe -std=c++17
 CXXFLAGS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --cflags-only-I $(PKGS))
 LDLIBS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --libs $(PKGS))
 
