@@ -108,7 +108,8 @@ int main(int argc, char* argv[])
   std::vector<int> markerIds;
   std::vector<std::vector<Point2f>> markerCorners;
 
-  while (true) {
+  while (true)
+  {
     // Get the latest NV12 image frame from VDO using the imageprovider
     VdoBuffer* buf = getLastFrameBlocking(provider);
     if (!buf) {
@@ -125,7 +126,7 @@ int main(int argc, char* argv[])
     cvtColor(nv12_mat, bgr_mat, COLOR_YUV2BGR_NV12, 3);
 
     float depth = detector.Detect(bgr_mat);
-    syslog(LOG_INFO, "%f", depth);
+    syslog(LOG_INFO, "'%d': %f", detector.GetStatus(), depth);
 
 
     aruco::detectMarkers(bgr_mat, dictionary, markerCorners, markerIds);
