@@ -43,23 +43,12 @@ int main(int argc, char* argv[])
 
   std::string path = "/usr/local/packages/opencv_app";
   for (const auto& entry: fs::directory_iterator(path))
-    syslog(LOG_INFO, "%s", entry.path().c_str());
-
-  /*
-  DIR* dir;
-  if (NULL != (dir = opendir("/usr/local/packages/opencv_app/config")))
   {
-    struct dirent* ent;
-    while(NULL != (ent = readdir(dir)))
-    {
-      syslog(LOG_INFO, ent->d_name);
-    }
-    closedir(dir);
-  };
-  */
+    syslog(LOG_INFO, "%s", entry.path().c_str());
+  }
 
 	// マーカーサイズ40センチ、ポール長さ24メートル
-	SnowDetector detector(SnowDetector::MARKER_6X6, 0.4f, 2.75f);
+	SnowDetector detector(SnowDetector::MARKER_6X6, 0.15f, 1.04f);
 
   if (2 <= argc)
   {
@@ -135,6 +124,10 @@ int main(int argc, char* argv[])
     // Convert the NV12 data to BGR
     cvtColor(nv12_mat, bgr_mat, COLOR_YUV2BGR_NV12, 3);
 
+    float depth = detector.Detect(bgr_mat);
+    syslog(LOG_INFO, "%f", depth);
+
+
     aruco::detectMarkers(bgr_mat, dictionary, markerCorners, markerIds);
     aruco::drawDetectedMarkers(bgr_mat, markerCorners);
     if (0 < markerIds.size())
@@ -145,6 +138,7 @@ int main(int argc, char* argv[])
     {
       syslog(LOG_ERR, "Not Detected");
     }
+
 
     // Perform background subtraction on the bgr image with
     // learning rate 0.005. The resulting image should have
