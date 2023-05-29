@@ -136,4 +136,5 @@ RUN cp lib*.* ../lib/
 #-------------------------------------------------------------------------------
 WORKDIR /opt/app
 
-RUN . /opt/axis/acapsdk/environment-setup* && acap-build .
+RUN . /opt/axis/acapsdk/environment-setup* && acap-build .\
+    -a 'config/AXIS_Q6215-LE.xml'
