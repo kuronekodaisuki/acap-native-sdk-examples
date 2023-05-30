@@ -66,4 +66,3 @@ RUN mkdir -p model && \
 RUN cp /opt/app/manifest.json.${CHIP} /opt/app/manifest.json && \
     . /opt/axis/acapsdk/environment-setup* && acap-build . \
     -a 'label/labels.txt' -a 'model/converted_model.tflite'
-

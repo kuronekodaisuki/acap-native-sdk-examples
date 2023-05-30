@@ -1,5 +1,5 @@
-PROG1	= object_detection
-OBJS1	= $(PROG1).c ImageProvider.cpp
+PROG1	= yolox
+OBJS1	= $(PROG1).c
 PROGS	= $(PROG1)
 
 PKGS = gio-2.0 vdostream gio-unix-2.0 liblarod
