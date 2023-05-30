@@ -191,16 +191,16 @@ void SnowDetector::Initialize(MARKER_TYPE markerType, float markerSize, float po
         break;
     }
 
-    // Refine with sub-pixel�@https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html
+    // Refine with sub-pixel https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html
     _detectorParams = cv::aruco::DetectorParameters::create();
     _detectorParams->cornerRefinementMethod = cv::aruco::CORNER_REFINE_APRILTAG;
 
-    // ���o�̈�(���W�n��Y���������)
-    _axesPoints.push_back(cv::Point3f(_poleOffset - POLE_WIDTH, 0, 0));              // ����
-    _axesPoints.push_back(cv::Point3f(_poleOffset + POLE_WIDTH, 0, 0));              // �E��
-    _axesPoints.push_back(cv::Point3f(_poleOffset - POLE_WIDTH, -poleLength, 0));    // ����
-    _axesPoints.push_back(cv::Point3f(_poleOffset + POLE_WIDTH, -poleLength, 0));    // �E��
-    _axesPoints.push_back(cv::Point3f(_poleOffset, -poleLength / 2, 0));  // �|�[�����S
+    //
+    _axesPoints.push_back(cv::Point3f(_poleOffset - POLE_WIDTH, 0, 0));              //
+    _axesPoints.push_back(cv::Point3f(_poleOffset + POLE_WIDTH, 0, 0));              //
+    _axesPoints.push_back(cv::Point3f(_poleOffset - POLE_WIDTH, -poleLength, 0));    //
+    _axesPoints.push_back(cv::Point3f(_poleOffset + POLE_WIDTH, -poleLength, 0));    //
+    _axesPoints.push_back(cv::Point3f(_poleOffset, -poleLength / 2, 0));  //
 
     int nStates = 18; // the number of states
     int nMeasurements = 6; // the number of measured states
@@ -218,20 +218,20 @@ bool SnowDetector::Configure(const char* filepath, MARKER_TYPE markerType, float
 }
 
 /// <summary>
-/// �R���X�g���N�^
+///
 /// </summary>
-/// <param name="markerType">�}�[�J�[�^�C�v</param>
-/// <param name="markerSize">�}�[�J�[�T�C�Y(m)</param>
-/// <param name="poleLength">�|�[���T�C�Y(m)</param>
+/// <param name="markerType"></param>
+/// <param name="markerSize">(m)</param>
+/// <param name="poleLength">(m)</param>
 SnowDetector::SnowDetector(MARKER_TYPE markerType, float markerSize, float poleLength)
 {
     Initialize(markerType, markerSize, poleLength);
 }
 
 /// <summary>
-/// �J�����p�����[�^�̐ݒ�
+///
 /// </summary>
-/// <param name="YamlFilepath">YAML�t�@�C���p�X</param>
+/// <param name="YamlFilepath">YAML</param>
 /// <returns></returns>
 bool SnowDetector::LoadCameraParameters(const char* filepath)
 {
@@ -369,7 +369,7 @@ float SnowDetector::Detect(cv::Mat image)
     {
         cv::fillPoly(image, _markerCorner, BLACK);
     }
-    // 1�b���ƂɍX�V
+    //
     if (_states.size() <= _counter)
     {
         float sum = 0;
@@ -519,13 +519,13 @@ float SnowDetector::estimateDepth(cv::Mat bilevel, cv::Mat& image, int index, fl
     cv::Point2f rightBottom;
     cv::Point2f center;
 
-    // �ړ�����
+    //
     cv::Vec3d tvec = _tvecs[index];
     cv::Vec3d rvec = _rvecs[index];
 
     if (rvec[1] < 0)
     {
-        // �␳
+        //
         //rvec = FixRotate(tvec, rvec);
 
         _status = NG;
@@ -547,7 +547,7 @@ float SnowDetector::estimateDepth(cv::Mat bilevel, cv::Mat& image, int index, fl
         _average[_markerIdx[index]].Update(tvec, rvec);
     }
 
-    // ���o�̈�(���W�n��Y���������)
+    //
     std::vector<cv::Point2f> projectedPoints;
     projectPoints(_axesPoints, rvec, tvec, _cameraMatrix, _distCoeffs, projectedPoints);
 
@@ -562,34 +562,34 @@ float SnowDetector::estimateDepth(cv::Mat bilevel, cv::Mat& image, int index, fl
     //cv::line(image, leftTop, leftBottom, RED);
     //cv::line(image, rightTop, rightBottom, RED);
 
-    // �X��
+    //
     double angle = (double)atan2((leftBottom.y - leftTop.y), (leftBottom.x - leftTop.x)) * 180 / M_PI;
 
     float width = sqrt((leftTop.x - rightTop.x) * (leftTop.x - rightTop.x) + (leftTop.y - rightTop.y) * (leftTop.y - rightTop.y));
     float height = sqrt((leftTop.x - leftBottom.x) * (leftTop.x - leftBottom.x) + (leftTop.y - leftBottom.y) * (leftTop.y - leftBottom.y));
-    // �|�[�����S�ŌX���␳
+    //
     _deskew = RotateAndCrop(_grayscale, center.x, center.y, angle - 90, (int)width * 2, (int)height);
-    // deskew����臒l���Z�o
+    // deskew
     cv::Mat bi;
     double threshold = cv::threshold(_grayscale, bi, 0, 255, cv::THRESH_OTSU) * MARGIN;
 #ifdef _DEBUIG
     std::cout << threshold << std::endl;
 #endif
-    // �X�����������Ƃ��̂݌v��
+    //
     if (abs(90 - angle) < 10)
     {
-        // TODO �摜�͈̔͊O�ɏo���ꍇ�̏���
+        // TODO
 
-        // �X���ɉ����ĒT���͈͂��X����
+        //
         float left = leftBottom.x;
         float right = rightBottom.x;
         float delta = (leftBottom.x - leftTop.x) / (leftBottom.y - leftTop.y);
 
-        // �|�[���̖��[�����ɑ�������
+        //
         for (int y = (int)leftBottom.y; y > leftTop.y; y--)
         {
             uchar* ptr = bilevel.ptr(y);
-            // �������̉�f�̕��ϔZ�x�����߂�
+            //
             int value = 0, pixels = 0;
 
             for (int x = (int)left; x < right; x++, pixels++)
@@ -601,7 +601,7 @@ float SnowDetector::estimateDepth(cv::Mat bilevel, cv::Mat& image, int index, fl
             left -= delta;
             right -= delta;
 
-            // ���ϔZ�x��200�����ɉ��������n�_��ϐ�Ƃ���
+            //
             if (value < threshold)
             {
                 depth = std::round(poleLength * 100 * (leftBottom.y - y) / (leftBottom.y - leftTop.y));
@@ -627,12 +627,12 @@ float SnowDetector::estimateDepth(cv::Mat bilevel, cv::Mat& image, int index, fl
 }
 
 /// <summary>
-/// ���W�n��\�����b�V���\��
+///
 /// </summary>
 /// <param name="image"></param>
 void SnowDetector::ShowMesh(cv::Mat image, cv::Vec3d& tvec, cv::Vec3d& rvec)
 {
-    // ���o�̈�
+    //
     std::vector<cv::Point3f> points;
     for (int x = -MESH_SIZE; x <= MESH_SIZE; x++)
     {
@@ -653,36 +653,34 @@ void SnowDetector::ShowMesh(cv::Mat image, cv::Vec3d& tvec, cv::Vec3d& rvec)
 }
 
 /// <summary>
-/// ���z�I�ȃ|�[���̕`��
+///
 /// </summary>
-/// <param name="image">�`���摜</param>
-/// <param name="index">�}�[�J�[�C���f�b�N�X</param>
-/// <param name="thickness">����</param>
+/// <param name="image"></param>
+/// <param name="index"></param>
+/// <param name="thickness"></param>
 void SnowDetector::drawPole(cv::Mat& image, cv::Vec3d& tvec, cv::Vec3d& rvec, int thickness)
 {
     int numPoints = (int)(_poleLength / 0.1f);
     // project axes points
     std::vector<cv::Point3f> axesPoints;
 
-    // �g��������
+    //
     for (int i = 0; i < numPoints; i++)
     {
         axesPoints.push_back(cv::Point3f(_poleOffset, i * -0.1f, 0));
     }
-    // �|�[���[
+    //
     axesPoints.push_back(cv::Point3f(_poleOffset, -_poleLength, 0));
 
     std::vector<cv::Point2f> projectedPoints;
     cv::projectPoints(axesPoints, rvec, tvec, _cameraMatrix, _distCoeffs, projectedPoints);
 
-    // �|�[��
+    //
     cv::line(image, projectedPoints[0], projectedPoints[numPoints], RED, thickness);
 
-    // �g����
+    //
     for (int i = 0; i < numPoints; i += 2)
     {
         cv::line(image, projectedPoints[i], projectedPoints[i + 1], cv::Scalar(0, 255, 255), thickness);
     }
 }
-
-
