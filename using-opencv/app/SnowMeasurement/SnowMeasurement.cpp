@@ -298,6 +298,10 @@ float SnowDetector::Detect(cv::Mat image)
     std::vector<std::vector<cv::Point2f>> markerCorners, rejectedImgPoints;
     // Detect markers
     cv::aruco::detectMarkers(image, _dictionary, markerCorners, _markerIdx, _detectorParams, rejectedImgPoints);
+    for (int i = 0; i < _markerIdx.size(); i++)
+    {
+      syslog(LOG_INFO, "Marker:%d", _markerIdx[i]);
+    }
 #ifdef DRAW_MARKERS
     cv::aruco::drawDetectedMarkers(image, markerCorners, _markerIdx);
 #endif
@@ -529,12 +533,12 @@ float SnowDetector::estimateDepth(cv::Mat bilevel, cv::Mat& image, int index, fl
         //rvec = FixRotate(tvec, rvec);
 
         _status = NG;
-        return -1;
+        //return -1;
     }
     _theta = sqrt(rvec[0] * rvec[0] + rvec[1] * rvec[1] + rvec[2] * rvec[2]);
 
-    char buffer[200];
-    sprintf(buffer, "Theta:%f R:%f %f %f", _theta * 180 / M_PI, rvec[0], rvec[1], rvec[2]);
+    //char buffer[200];
+    //sprintf(buffer, "Theta:%f R:%f %f %f", _theta * 180 / M_PI, rvec[0], rvec[1], rvec[2]);
     //cv::putText(image, buffer, cv::Point2f(0, 60), cv::FONT_HERSHEY_PLAIN, 1.5, YELLO);
 
     auto find = _average.find(_markerIdx[index]);
