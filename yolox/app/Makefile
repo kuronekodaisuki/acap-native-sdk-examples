@@ -1,4 +1,4 @@
-PROG1	= object_detection
+PROG1	= yolox
 OBJS1	= $(PROG1).c argparse.c imgprovider.c imgutils.c
 PROGS	= $(PROG1)
 

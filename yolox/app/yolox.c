@@ -363,8 +363,7 @@ end:
 /**
  * @brief Main function that starts a stream with different options.
  */
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     // Hardcode to use three image "color" channels (eg. RGB).
     const unsigned int CHANNELS = 3;
     // Hardcode to set output bytes of four tensors from MobileNet V2 model.
