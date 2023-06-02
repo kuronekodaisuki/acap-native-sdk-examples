@@ -18,8 +18,10 @@ ARG BUILD_DIR=/opt/build
 # Install build dependencies for cross compiling OpenCV
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update && apt-get install -y -f --no-install-recommends \
-    libcairomm-1.0-dev \
+    #libcairomm-1.0-dev \
     #libeigen3-dev \
+    libcairo2-dev \
+    g++ \
     cmake && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -36,7 +38,7 @@ ARG OPENCV_BUILD_DIR=${OPENCV_DIR}/build
 #
 # OpenCV aruco module
 #
-COPY aruco ${OPENCV_SRC_DIR}/modules/aruco
+#COPY aruco ${OPENCV_SRC_DIR}/modules/aruco
 
 WORKDIR ${OPENCV_DIR}
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -111,19 +113,19 @@ COPY ./app .
 RUN mkdir lib && \
     cp -P ${OPENCV_BUILD_DIR}/lib/lib*.so* ./lib/
 
-WORKDIR /opt/app/SnowMeasurement
+#WORKDIR /opt/app/SnowMeasurement
 #
 # build SnowMeasurement library
 #
-RUN . /opt/axis/acapsdk/environment-setup* && \
-    cmake \
-        -D CMAKE_CXX_COMPILER=${CXX%-g++*}-g++ \
-        -D CMAKE_CXX_FLAGS="${CXX#*-g++}" \
-        -D CMAKE_C_COMPILER=${CC%-gcc*}-gcc \
-        -D CMAKE_C_FLAGS="${CC#*-gcc}" \
-        -D OPENCV_INCLUDE_DIR=$SDK_LIB_PATH_BASE/include/opencv4 \
-        -D OPENCV_LIBRARIES=$SDK_LIB_PATH_BASE/lib \
-        .
+#RUN . /opt/axis/acapsdk/environment-setup* && \
+#    cmake \
+#        -D CMAKE_CXX_COMPILER=${CXX%-g++*}-g++ \
+#        -D CMAKE_CXX_FLAGS="${CXX#*-g++}" \
+#        -D CMAKE_C_COMPILER=${CC%-gcc*}-gcc \
+#        -D CMAKE_C_FLAGS="${CC#*-gcc}" \
+#        -D OPENCV_INCLUDE_DIR=$SDK_LIB_PATH_BASE/include/opencv4 \
+#        -D OPENCV_LIBRARIES=$SDK_LIB_PATH_BASE/lib \
+#        .
 
 #
 # Build
