@@ -53,6 +53,9 @@
 #include <sys/types.h>
 #include <syslog.h>
 #include <unistd.h>
+#include <glib.h>
+#include <cairo/cairo.h>
+#include <axoverlay.h>
 
 #include "argparse.h"
 #include "imgprovider.h"
@@ -61,6 +64,151 @@
 #include "vdo-frame.h"
 #include "vdo-types.h"
 
+#define PALETTE_VALUE_RANGE 255.0
+static gint overlay_id      = -1;
+static gint overlay_id_text = -1;
+static gint counter = 10;
+static gint top_color = 1;
+static gint bottom_color = 3;
+
+/***** Drawing functions *****************************************************/
+
+/**
+ * brief Converts palette color index to cairo color value.
+ *
+ * This function converts the palette index, which has been initialized by
+ * function axoverlay_set_palette_color to a value that can be used by
+ * function cairo_set_source_rgba.
+ *
+ * param color_index Index in the palette setup.
+ *
+ * return color value.
+ */
+static gdouble
+index2cairo(gint color_index)
+{
+  return ((color_index << 4) + color_index) / PALETTE_VALUE_RANGE;
+}
+
+/**
+ * brief Draw a rectangle using palette.
+ *
+ * This function draws a rectangle with lines from coordinates
+ * left, top, right and bottom with a palette color index and
+ * line width.
+ *
+ * param context Cairo rendering context.
+ * param left Left coordinate (x1).
+ * param top Top coordinate (y1).
+ * param right Right coordinate (x2).
+ * param bottom Bottom coordinate (y2).
+ * param color_index Palette color index.
+ * param line_width Rectange line width.
+ */
+static void
+draw_rectangle(cairo_t *context, gint left, gint top,
+               gint right, gint bottom,
+               gint color_index, gint line_width)
+{
+  gdouble val = 0;
+
+  val = index2cairo(color_index);
+  cairo_set_source_rgba(context, val, val, val, val);
+  cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
+  cairo_set_line_width(context, line_width);
+  cairo_rectangle(context, left, top, right - left, bottom - top);
+  cairo_stroke(context);
+}
+
+/**
+ * brief Draw a text using cairo.
+ *
+ * This function draws a text with a specified middle position,
+ * which will be adjusted depending on the text length.
+ *
+ * param context Cairo rendering context.
+ * param pos_x Center position coordinate (x).
+ * param pos_y Center position coordinate (y).
+ */
+static void
+draw_text(cairo_t *context, gint pos_x, gint pos_y)
+{
+  cairo_text_extents_t te;
+  cairo_text_extents_t te_length;
+  gchar *str = NULL;
+  gchar *str_length = NULL;
+
+  //  Show text in black
+  cairo_set_source_rgb(context, 0, 0, 0);
+  cairo_select_font_face(context, "serif", CAIRO_FONT_SLANT_NORMAL,
+                         CAIRO_FONT_WEIGHT_BOLD);
+  cairo_set_font_size(context, 32.0);
+
+  // Position the text at a fix centered position
+  str_length = g_strdup_printf("Countdown  ");
+  cairo_text_extents(context, str_length, &te_length);
+  cairo_move_to(context, pos_x - te_length.width / 2, pos_y);
+  g_free(str_length);
+
+  // Add the counter number to the shown text
+  str = g_strdup_printf("Countdown %i", counter);
+  cairo_text_extents(context, str, &te);
+  cairo_show_text(context, str);
+  g_free(str);
+}
+
+/**
+ * brief Setup an overlay_data struct.
+ *
+ * This function initialize and setup an overlay_data
+ * struct with default values.
+ *
+ * param data The overlay data struct to initialize.
+ */
+static void
+setup_axoverlay_data(struct axoverlay_overlay_data *data)
+{
+  axoverlay_init_overlay_data(data);
+  data->postype = AXOVERLAY_CUSTOM_NORMALIZED;
+  data->anchor_point = AXOVERLAY_ANCHOR_CENTER;
+  data->x = 0.0;
+  data->y = 0.0;
+  data->scale_to_stream = FALSE;
+}
+
+/**
+ * brief Setup palette color table.
+ *
+ * This function initialize and setup an palette index
+ * representing ARGB values.
+ *
+ * param color_index Palette color index.
+ * param r R (red) value.
+ * param g G (green) value.
+ * param b B (blue) value.
+ * param a A (alpha) value.
+ *
+ * return result as boolean
+ */
+static gboolean
+setup_palette_color(gint index, gint r, gint g, gint b, gint a)
+{
+  GError *error = NULL;
+  struct axoverlay_palette_color color;
+
+  color.red = r;
+  color.green = g;
+  color.blue = b;
+  color.alpha = a;
+  color.pixelate = FALSE;
+  axoverlay_set_palette_color(index, &color, &error);
+  if (error != NULL) {
+    g_error_free(error);
+    return FALSE;
+  }
+
+  return TRUE;
+}
 
 /**
  * @brief Free up resources held by an array of labels.
@@ -359,11 +507,61 @@ end:
     return ret;
 }
 
+int SetupOverlay()
+{
+    GError *error = NULL;
+    gint camera_height = 0;
+    gint camera_width = 0;
+
+    if(!axoverlay_is_backend_supported(AXOVERLAY_CAIRO_IMAGE_BACKEND)) {
+        syslog(LOG_ERR, "AXOVERLAY_CAIRO_IMAGE_BACKEND is not supported");
+        return 1;
+    }
+
+    //  Initialize the library
+    struct axoverlay_settings settings;
+    axoverlay_init_axoverlay_settings(&settings);
+    //settings.render_callback = render_overlay_cb;
+    //settings.adjustment_callback = adjustment_cb;
+    settings.select_callback = NULL;
+    settings.backend = AXOVERLAY_CAIRO_IMAGE_BACKEND;
+    axoverlay_init(&settings, &error);
+    if (error != NULL) {
+        syslog(LOG_ERR, "Failed to initialize axoverlay: %s", error->message);
+        g_error_free(error);
+        return 1;
+    }
+
+    //  Setup colors
+    if (!setup_palette_color(0, 0, 0, 0, 0) ||
+        !setup_palette_color(1, 255, 0, 0, 255) ||
+        !setup_palette_color(2, 0, 255, 0, 255) ||
+        !setup_palette_color(3, 0, 0, 255, 255)) {
+        syslog(LOG_ERR, "Failed to setup palette colors");
+        return 1;
+    }
+
+    // Get max resolution for width and height
+    camera_width = axoverlay_get_max_resolution_width(1, &error);
+    g_error_free(error);
+    camera_height = axoverlay_get_max_resolution_height(1, &error);
+    g_error_free(error);
+    syslog(LOG_INFO, "Max resolution (width x height): %i x %i", camera_width,
+            camera_height);
+
+    // Create a large overlay using Palette color space
+    struct axoverlay_overlay_data data;
+    setup_axoverlay_data(&data);
+}
+
 
 /**
  * @brief Main function that starts a stream with different options.
  */
-int main(int argc, char** argv) {
+int main(int argc, char** argv) 
+{
+    SetupOverlay();
+
     // Hardcode to use three image "color" channels (eg. RGB).
     const unsigned int CHANNELS = 3;
     // Hardcode to set output bytes of four tensors from MobileNet V2 model.
@@ -706,7 +904,8 @@ int main(int argc, char** argv) {
         goto end;
     }
 
-    while (true) {
+    while (true) 
+    {
         struct timeval startTs, endTs;
         unsigned int elapsedMs = 0;
 
@@ -786,13 +985,14 @@ int main(int argc, char** argv) {
         float* scores = (float*) larodOutput3Addr;
         float* numberofdetections = (float*) larodOutput4Addr;
 
-        if ((int) numberofdetections[0] == 0) {
+        if ((int) numberofdetections[0] == 0) 
+        {
            syslog(LOG_INFO,"No object is detected");
         }
-        else {
-
-            for (int i = 0; i < numberofdetections[0]; i++){
-
+        else 
+        {
+            for (int i = 0; i < numberofdetections[0]; i++)
+            {
                 float top = locations[4*i];
                 float left = locations[4*i+1];
                 float bottom = locations[4*i+2];
@@ -803,7 +1003,8 @@ int main(int argc, char** argv) {
                 unsigned int crop_w = (right - left) * rawWidth;
                 unsigned int crop_h = (bottom - top) * rawHeight;
 
-                if (scores[i] >= args.threshold/100.0){
+                if (scores[i] >= args.threshold/100.0)
+                {
                     syslog(LOG_INFO, "Object %d: Classes: %s - Scores: %f - Locations: [%f,%f,%f,%f]",
                        i, labels[(int) classes[i]], scores[i], top, left, bottom, right);
 

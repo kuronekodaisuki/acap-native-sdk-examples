@@ -609,7 +609,8 @@ int main(int argc, char** argv)
         goto end;
     }
 
-    for (unsigned int i = 0; i < numRounds && !stopRunning; i++) {
+    for (unsigned int i = 0; i < numRounds && !stopRunning; i++) 
+    {
         struct timeval startTs, endTs;
         unsigned int elapsedMs = 0;
 
@@ -655,7 +656,10 @@ int main(int argc, char** argv)
         }
 
         gettimeofday(&startTs, NULL);
-        if (!larodRunJob(conn, infReq, &error)) {
+
+        // Inference NOW!
+        if (!larodRunJob(conn, infReq, &error)) 
+        {
             syslog(LOG_ERR, "Unable to run inference on model %s: %s (%d)",
                    modelFile, error->msg, error->code);
             goto end;
@@ -666,13 +670,16 @@ int main(int argc, char** argv)
                                     ((endTs.tv_usec - startTs.tv_usec) / 1000));
         syslog(LOG_INFO, "Ran inference for %u ms", elapsedMs);
 
-        if (strcmp(chipString, "ambarella-cvflow") != 0){
+        if (strcmp(chipString, "ambarella-cvflow") != 0)
+        {
             uint8_t* person_pred = (uint8_t*) larodOutput1Addr;
             uint8_t* car_pred = (uint8_t*) larodOutput2Addr;
 
             syslog(LOG_INFO, "Person detected: %.2f%% - Car detected: %.2f%%",
                 (float) person_pred[0] / 2.55f, (float) car_pred[0]  / 2.55f);
-        } else {
+        } 
+        else 
+        {
             uint8_t* car_pred = (uint8_t*) larodOutput1Addr;
             uint8_t* person_pred = (uint8_t*) larodOutput2Addr;
             float float_score_car = *((float*) car_pred);
