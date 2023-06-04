@@ -238,7 +238,7 @@ static bool setupLarod(const char* chipString, const int larodModelFd,
     // List available chip id:s
     size_t numDevices = 0;
     syslog(LOG_INFO, "Available chip IDs:");
-    const larodDevice** devices; 
+    const larodDevice** devices;
     devices = larodListDevices(conn, &numDevices, &error);
     for (size_t i = 0; i < numDevices; ++i) {
             syslog(LOG_INFO, "%s: %s", "Chip", larodGetDeviceName(devices[i], &error));;
@@ -268,6 +268,183 @@ end:
     }
 
     return ret;
+}
+
+/***** Callback functions ****************************************************/
+
+/**
+ * brief A callback function called when an overlay needs adjustments.
+ *
+ * This function is called to let developers make adjustments to
+ * the size and position of their overlays for each stream. This callback
+ * function is called prior to rendering every time when an overlay
+ * is rendered on a stream, which is useful if the resolution has been
+ * updated or rotation has changed.
+ *
+ * param id Overlay id.
+ * param stream Information about the rendered stream.
+ * param postype The position type.
+ * param overlay_x The x coordinate of the overlay.
+ * param overlay_y The y coordinate of the overlay.
+ * param overlay_width Overlay width.
+ * param overlay_height Overlay height.
+ * param user_data Optional user data associated with this overlay.
+ */
+static void
+adjustment_cb(gint id, struct axoverlay_stream_data *stream,
+              enum axoverlay_position_type *postype,
+              gfloat *overlay_x, gfloat *overlay_y,
+              gint *overlay_width, gint *overlay_height,
+              gpointer user_data)
+{
+  syslog(LOG_INFO, "Adjust callback for overlay: %i x %i", *overlay_width, *overlay_height);
+  syslog(LOG_INFO, "Adjust callback for stream: %i x %i", stream->width, stream->height);
+
+  *overlay_width = stream->width;
+  *overlay_height = stream->height;
+}
+
+/**
+ * brief A callback function called when an overlay needs to be drawn.
+ *
+ * This function is called whenever the system redraws an overlay. This can
+ * happen in two cases, axoverlay_redraw() is called or a new stream is
+ * started.
+ *
+ * param rendering_context A pointer to the rendering context.
+ * param id Overlay id.
+ * param stream Information about the rendered stream.
+ * param postype The position type.
+ * param overlay_x The x coordinate of the overlay.
+ * param overlay_y The y coordinate of the overlay.
+ * param overlay_width Overlay width.
+ * param overlay_height Overlay height.
+ * param user_data Optional user data associated with this overlay.
+ */
+static void
+render_overlay_cb(gpointer rendering_context, gint id,
+                  struct axoverlay_stream_data *stream,
+                  enum axoverlay_position_type postype, gfloat overlay_x,
+                  gfloat overlay_y, gint overlay_width, gint overlay_height,
+                  gpointer user_data)
+{
+  gdouble val = FALSE;
+
+  syslog(LOG_INFO, "Render callback for camera: %i", stream->camera);
+  syslog(LOG_INFO, "Render callback for overlay: %i x %i", overlay_width, overlay_height);
+  syslog(LOG_INFO, "Render callback for stream: %i x %i", stream->width, stream->height);
+
+  if (id == overlay_id) {
+    //  Clear background by drawing a "filled" rectangle
+    val = index2cairo(0);
+    cairo_set_source_rgba(rendering_context, val, val, val, val);
+    cairo_set_operator(rendering_context, CAIRO_OPERATOR_SOURCE);
+    cairo_rectangle(rendering_context, 0, 0, stream->width, stream->height);
+    cairo_fill(rendering_context);
+
+    //  Draw a top rectangle in toggling color
+    draw_rectangle(rendering_context, 0, 0, stream->width,
+                   stream->height / 4, top_color, 9.6);
+
+    //  Draw a bottom rectangle in toggling color
+    draw_rectangle(rendering_context, 0, stream->height * 3 / 4, stream->width,
+                   stream->height, bottom_color, 2.0);
+  } else if (id == overlay_id_text) {
+    //  Show text in black
+    draw_text(rendering_context, stream->width / 2, stream->height / 2);
+  } else {
+    syslog(LOG_INFO, "Unknown overlay id!");
+  }
+}
+
+/**
+ * brief Callback function which is called when animation timer has elapsed.
+ *
+ * This function is called when the animation timer has elapsed, which will
+ * update the counter, colors and also trigger a redraw of the overlay.
+ *
+ * param user_data Optional callback user data.
+ */
+static gboolean
+update_overlay_cb(gpointer user_data)
+{
+  GError *error = NULL;
+
+  // Countdown
+  counter = counter < 1 ? 10 : counter - 1;
+
+  if (counter == 0) {
+    // A small color surprise
+    top_color = top_color > 2 ? 1 : top_color + 1;
+    bottom_color = bottom_color > 2 ? 1 : bottom_color + 1;
+  }
+
+  // Request a redraw of the overlay
+  axoverlay_redraw(&error);
+  if (error != NULL) {
+    /*
+     * If redraw fails then it is likely due to that overlayd has
+     * crashed. Don't exit instead wait for overlayd to restart and
+     * for axoverlay to restore the connection.
+     */
+    syslog(LOG_ERR, "Failed to redraw overlay (%d): %s", error->code, error->message);
+    g_error_free(error);
+  }
+
+  return G_SOURCE_CONTINUE;
+}
+
+/***** Signal handler functions **********************************************/
+
+/**
+ * brief Handles the signals.
+ *
+ * This function handles the signals when it is time to
+ * quit the main loop.
+ *
+ * param signal_num Signal number.
+ */
+static void
+signal_handler(gint signal_num)
+{
+  switch (signal_num) {
+  case SIGTERM:
+  case SIGABRT:
+  case SIGINT:
+    //g_main_loop_quit(main_loop);
+    break;
+  default:
+    break;
+  }
+}
+
+/**
+ * brief Initialize the signal handler.
+ *
+ * This function handles the initialization of signals.
+ *
+ * return result as boolean.
+ */
+static gboolean
+signal_handler_init(void)
+{
+  struct sigaction sa = {0};
+
+  if (sigemptyset(&sa.sa_mask) == -1) {
+    syslog(LOG_ERR, "Failed to initialize signal handler: %s", strerror(errno));
+    return FALSE;
+  }
+
+  sa.sa_handler = signal_handler;
+
+  if ((sigaction(SIGTERM, &sa, NULL) < 0) ||
+      (sigaction(SIGABRT, &sa, NULL) < 0) ||
+      (sigaction(SIGINT, &sa, NULL) < 0)) {
+    syslog(LOG_ERR, "Failed to install signal handler: %s", strerror(errno));
+    return FALSE;
+  }
+
+  return TRUE;
 }
 
 int SetupOverlay()
@@ -320,7 +497,7 @@ int SetupOverlay()
 /**
  * brief Main function that starts a stream with different options.
  */
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
     SetupOverlay();
 
@@ -366,7 +543,7 @@ int main(int argc, char** argv)
     const int inputWidth = atoi(argv[3]);
     const int inputHeight = atoi(argv[4]);
     const int numRounds = atoi(argv[5]);
-    
+
     // Open the syslog to report messages for "vdo_larod"
     openlog("vdo_larod", LOG_PID|LOG_CONS, LOG_USER);
     syslog(LOG_INFO, "Starting %s", argv[0]);
@@ -609,7 +786,7 @@ int main(int argc, char** argv)
         goto end;
     }
 
-    for (unsigned int i = 0; i < numRounds && !stopRunning; i++) 
+    for (unsigned int i = 0; i < numRounds && !stopRunning; i++)
     {
         struct timeval startTs, endTs;
         unsigned int elapsedMs = 0;
@@ -658,7 +835,7 @@ int main(int argc, char** argv)
         gettimeofday(&startTs, NULL);
 
         // Inference NOW!
-        if (!larodRunJob(conn, infReq, &error)) 
+        if (!larodRunJob(conn, infReq, &error))
         {
             syslog(LOG_ERR, "Unable to run inference on model %s: %s (%d)",
                    modelFile, error->msg, error->code);
@@ -677,8 +854,8 @@ int main(int argc, char** argv)
 
             syslog(LOG_INFO, "Person detected: %.2f%% - Car detected: %.2f%%",
                 (float) person_pred[0] / 2.55f, (float) car_pred[0]  / 2.55f);
-        } 
-        else 
+        }
+        else
         {
             uint8_t* car_pred = (uint8_t*) larodOutput1Addr;
             uint8_t* person_pred = (uint8_t*) larodOutput2Addr;
