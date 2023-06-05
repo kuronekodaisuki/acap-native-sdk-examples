@@ -21,7 +21,10 @@
 #pragma once
 
 #include <pthread.h>
-#include <stdatomic.h>
+//#include <stdatomic.h>
+# include <atomic>
+# define _Atomic(X) std::atomic< X >
+
 #include <stdbool.h>
 
 #include "vdo-stream.h"
@@ -54,7 +57,7 @@ typedef struct ImgProvider {
     pthread_mutex_t frameMutex;
     pthread_cond_t frameDeliverCond;
     pthread_t fetcherThread;
-    atomic_bool shutDown;
+    std::atomic_bool shutDown;
 } ImgProvider_t;
 
 /**
