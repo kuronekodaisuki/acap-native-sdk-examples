@@ -1,5 +1,5 @@
 PROG1	= vdo_larod
-OBJS1	= $(PROG1).c imgprovider.c utility-functions.c
+OBJS1	= $(PROG1).cpp imgprovider.cpp
 PROGS	= $(PROG1)
 
 PKGS = gio-2.0 vdostream gio-unix-2.0 liblarod cairo
@@ -15,7 +15,7 @@ CFLAGS += -DLAROD_API_VERSION_3
 all: $(PROGS)
 
 $(PROG1): $(OBJS1)
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
+	$(CXX) $(CFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 clean:
 	rm -f $(PROGS) *.o *.eap

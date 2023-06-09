@@ -33,7 +33,7 @@
 
 #include "imgprovider.h"
 #include "larod.h"
-#include "utility-functions.h"
+//#include "utility-functions.h"
 #include "vdo-frame.h"
 #include "vdo-types.h"
 
@@ -223,46 +223,45 @@ static void sigintHandler(int sig) {
  * return False if error has occurred, otherwise true.
  */
 static bool setupLarod(const char* chipString, const int larodModelFd,
-                       larodConnection** larodConn, larodModel** model) {
+                       larodConnection** larodConn, larodModel** model)
+{
     larodError* error = NULL;
     larodConnection* conn = NULL;
     larodModel* loadedModel = NULL;
     bool ret = false;
 
     // Set up larod connection.
-    if (!larodConnect(&conn, &error)) {
+    if (larodConnect(&conn, &error))
+    {
+      // List available chip id:s
+      size_t numDevices = 0;
+      syslog(LOG_INFO, "Available chip IDs:");
+      const larodDevice** devices;
+      devices = larodListDevices(conn, &numDevices, &error);
+      for (size_t i = 0; i < numDevices; ++i)
+      {
+        syslog(LOG_INFO, "%s: %s", "Chip", larodGetDeviceName(devices[i], &error));;
+      }
+      const larodDevice* dev = larodGetDevice(conn, chipString, 0, &error);
+      loadedModel = larodLoadModel(conn, larodModelFd, dev, LAROD_ACCESS_PRIVATE,
+                                  "Vdo Example App Model", NULL, &error);
+      if (!loadedModel)
+      {
+          syslog(LOG_ERR, "%s: Unable to load model: %s", __func__, error->msg);
+          larodDisconnect(&conn, NULL);
+      }
+      else
+      {
+        *larodConn = conn;
+        *model = loadedModel;
+        ret = true;
+      }
+    }
+    else
+    {
         syslog(LOG_ERR, "%s: Could not connect to larod: %s", __func__, error->msg);
-        goto end;
     }
 
-    // List available chip id:s
-    size_t numDevices = 0;
-    syslog(LOG_INFO, "Available chip IDs:");
-    const larodDevice** devices;
-    devices = larodListDevices(conn, &numDevices, &error);
-    for (size_t i = 0; i < numDevices; ++i) {
-            syslog(LOG_INFO, "%s: %s", "Chip", larodGetDeviceName(devices[i], &error));;
-        }
-    const larodDevice* dev = larodGetDevice(conn, chipString, 0, &error);
-    loadedModel = larodLoadModel(conn, larodModelFd, dev, LAROD_ACCESS_PRIVATE,
-                                 "Vdo Example App Model", NULL, &error);
-    if (!loadedModel) {
-        syslog(LOG_ERR, "%s: Unable to load model: %s", __func__, error->msg);
-        goto error;
-    }
-    *larodConn = conn;
-    *model = loadedModel;
-
-    ret = true;
-
-    goto end;
-
-error:
-    if (conn) {
-        larodDisconnect(&conn, NULL);
-    }
-
-end:
     if (error) {
         larodClearError(&error);
     }
