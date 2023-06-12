@@ -1,0 +1,53 @@
+
+----- Contents of SYSTEM_LOG for 'vdo_larod' -----
+
+
+2023-06-09T14:50:19.206+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Starting /usr/local/packages/vdo_larod/vdo_larod
+2023-06-09T14:50:19.502+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Creating VDO image provider and creating stream 480 x 270
+2023-06-09T14:50:19.502+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Dump of vdo stream settings map =====
+2023-06-09T14:50:19.502+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: chooseStreamResolution: We select stream w/h=480 x 270 based on VDO channel info.
+2023-06-09T14:50:19.621+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Calculate crop image
+2023-06-09T14:50:19.621+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Create larod models
+2023-06-09T14:50:19.621+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Create preprocessing maps
+2023-06-09T14:50:19.621+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Crop VDO image X=0 Y=0 (480 x 270)
+2023-06-09T14:50:19.622+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Setting up larod connection with chip google-edge-tpu-tflite and model file /usr/local/packages/vdo_larod/models/converted_model_edgetpu.tflite
+2023-06-09T14:50:19.933+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Available chip IDs:
+2023-06-09T14:50:19.933+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Chip: axis-a7-gpu-tflite
+2023-06-09T14:50:19.933+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Chip: cpu-tflite
+2023-06-09T14:50:19.934+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Chip: google-edge-tpu-tflite
+2023-06-09T14:50:19.935+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Chip: axis-ace-proc
+2023-06-09T14:50:19.935+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Chip: cpu-proc
+2023-06-09T14:50:19.936+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Chip: axis-a7-gpu-proc
+2023-06-09T14:50:20.237+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Loading preprocessing model with chip cpu-proc
+2023-06-09T14:50:20.238+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Create input/output tensors
+2023-06-09T14:50:20.238+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Determine tensor buffer sizes
+2023-06-09T14:50:20.239+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Allocate memory for input/output buffers
+2023-06-09T14:50:20.239+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: createAndMapTmpFile: Setting up a temp fd with pattern /tmp/larod.in.test-XXXXXX and size 388800
+2023-06-09T14:50:20.239+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: createAndMapTmpFile: Setting up a temp fd with pattern /tmp/larod.pp.test-XXXXXX and size 194400
+2023-06-09T14:50:20.240+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: createAndMapTmpFile: Setting up a temp fd with pattern /tmp/larod.out1.test-XXXXXX and size 4
+2023-06-09T14:50:20.240+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: createAndMapTmpFile: Setting up a temp fd with pattern /tmp/larod.out2.test-XXXXXX and size 4
+2023-06-09T14:50:20.241+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Connect tensors to file descriptors
+2023-06-09T14:50:20.241+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Create job requests
+2023-06-09T14:50:20.242+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Start fetching video frames from VDO
+2023-06-09T14:50:20.252+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Converted image in 15 ms
+2023-06-09T14:50:20.268+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Person detected: 74.51% - Car detected: 2.35%
+2023-06-09T14:50:20.268+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Ran inference for 15 ms
+2023-06-09T14:50:20.279+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Converted image in 9 ms
+2023-06-09T14:50:20.287+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Person detected: 74.51% - Car detected: 2.35%
+2023-06-09T14:50:20.287+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Ran inference for 7 ms
+2023-06-09T14:50:20.310+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Converted image in 17 ms
+2023-06-09T14:50:20.314+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Person detected: 74.51% - Car detected: 2.35%
+2023-06-09T14:50:20.314+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Ran inference for 8 ms
+2023-06-09T14:50:20.322+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Converted image in 7 ms
+2023-06-09T14:50:20.329+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Person detected: 74.51% - Car detected: 2.35%
+2023-06-09T14:50:20.329+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Ran inference for 5 ms
+2023-06-09T14:50:20.338+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Converted image in 7 ms
+2023-06-09T14:50:20.348+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Person detected: 76.08% - Car detected: 2.35%
+2023-06-09T14:50:20.348+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Ran inference for 7 ms
+2023-06-09T14:50:20.348+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Stop streaming video from VDO
+2023-06-09T14:50:20.366+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: 'buffer.strategy': <uint32 3>
+2023-06-09T14:50:20.366+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: 'channel'--------: <uint32 1>
+2023-06-09T14:50:20.366+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: 'format'---------: <uint32 3>
+2023-06-09T14:50:20.366+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: 'height'---------: <uint32 270>
+2023-06-09T14:50:20.366+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: 'width'----------: <uint32 480>
+2023-06-09T14:50:20.366+09:00 axis-b8a44f27a336 [ INFO    ] vdo_larod[13475]: Exit /usr/local/packages/vdo_larod/vdo_larod
