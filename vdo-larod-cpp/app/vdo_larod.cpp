@@ -31,11 +31,14 @@
 #include <axoverlay.h>
 #include <syslog.h>
 
-#include "imgprovider.h"
+#include <opencv2/core.hpp>
+#include <opencv2/videoio.hpp>
+
+//#include "imgprovider.h"
 #include "larod.h"
 //#include "utility-functions.h"
-#include "vdo-frame.h"
-#include "vdo-types.h"
+//#include "vdo-frame.h"
+//#include "vdo-types.h"
 
 #define PALETTE_VALUE_RANGE 255.0
 static gint overlay_id      = -1;

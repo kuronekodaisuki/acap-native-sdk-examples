@@ -1,8 +1,8 @@
-ARG ARCH=armv7hf
+ARG ARCH=armv7hf-devel
 ARG VERSION=1.8
 ARG UBUNTU_VERSION=22.04
 ARG REPO=axisecp
-ARG SDK=acap-native-sdk
+ARG SDK=acap-computer-vision-sdk
 
 FROM ${REPO}/${SDK}:${VERSION}-${ARCH}-ubuntu${UBUNTU_VERSION}
 
@@ -20,9 +20,9 @@ RUN if [ "$CHIP" = artpec8 ]; then \
     elif [ "$CHIP" = cpu ]; then \
         curl -o model.zip $MODEL_BUCKET/models.aarch64.artpec8.zip ; \
     elif [ "$CHIP" = edgetpu ]; then \
-        curl -o model.zip $MODEL_BUCKET/models.armv7hf.edgetpu.zip ; \    
+        curl -o model.zip $MODEL_BUCKET/models.armv7hf.edgetpu.zip ; \
     elif [ "$CHIP" = cv25 ]; then \
-        curl -o model.zip $MODEL_BUCKET/tensorflow_to_larod_models.cv25.zip ; \        
+        curl -o model.zip $MODEL_BUCKET/tensorflow_to_larod_models.cv25.zip ; \
     else \
         printf "Error: '%s' is not a valid value for the CHIP variable\n", "$CHIP"; \
         exit 1; \
@@ -33,15 +33,18 @@ RUN if [ "$CHIP" = artpec8 ]; then \
 WORKDIR /opt/app
 COPY ./app .
 
+RUN mkdir -p label && \
+    curl -L -o label/labels.txt https://github.com/google-coral/test_data/raw/master/coco_labels.txt-a 'label/labels.txt'
+
 # Build the ACAP application
 RUN cp /opt/app/manifest.json.${CHIP} /opt/app/manifest.json && \
     . /opt/axis/acapsdk/environment-setup* && \
     if [ "$CHIP" = artpec8 ] || [ "$CHIP" = cpu ]; then \
-        acap-build . -a 'models/converted_model.tflite'; \
+        acap-build . -a 'models/converted_model.tflite' -a 'label/labels.txt'; \
     elif [ "$CHIP" = edgetpu ]; then \
-        acap-build . -a 'models/converted_model_edgetpu.tflite'; \
+        acap-build . -a 'models/converted_model_edgetpu.tflite' -a 'label/labels.txt'; \
     elif [ "$CHIP" = cv25 ]; then \
-        acap-build . -a 'models/car_human_model_cavalry.bin'; \
+        acap-build . -a 'models/car_human_model_cavalry.bin' -a 'label/labels.txt'; \
     else \
         printf "Error: '%s' is not a valid value for the CHIP variable\n", "$CHIP"; \
         exit 1; \
