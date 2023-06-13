@@ -20,7 +20,7 @@
 #include <opencv2/video.hpp>
 
 #include "SnowMeasurement/SnowMeasurement.h"
-#include "ImageProvider.hpp"
+#include "imgprovider.h"
 
 using namespace cv;
 
