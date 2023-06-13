@@ -16,13 +16,112 @@
 
 #include <stdlib.h>
 #include <syslog.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/video.hpp>
+
+#include "larod.h"
 
 #include "SnowMeasurement/SnowMeasurement.h"
 #include "imgprovider.h"
 
 using namespace cv;
+
+bool createAndMapTmpFile(char* fileName, size_t fileSize, void** mappedAddr, int* convFd)
+{
+    syslog(LOG_INFO, "%s: Setting up a temp fd with pattern %s and size %zu", __func__,
+           fileName, fileSize);
+
+    int fd = mkstemp(fileName);
+    if (0 <= fd)
+    {
+      // Allocate enough space in for the fd.
+      if (0 <= ftruncate(fd, (off_t) fileSize))
+      {
+        // Remove since we don't actually care about writing to the file system.
+        if (!unlink(fileName))
+        {
+          // Get an address to fd's memory for this process's memory space.
+          void* data = mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+
+          if (data != MAP_FAILED)
+          {
+            // SUCCESS
+            *mappedAddr = data;
+            *convFd = fd;
+            return true;
+          }
+          else
+          {
+              syslog(LOG_ERR, "%s: Unable to mmap temp file %s: %s", __func__, fileName, strerror(errno));
+          }
+        }
+        else
+        {
+            syslog(LOG_ERR, "%s: Unable to unlink from temp file %s: %s", __func__, fileName, strerror(errno));
+        }
+      }
+      else
+      {
+          syslog(LOG_ERR, "%s: Unable to truncate temp file %s: %s", __func__, fileName, strerror(errno));
+      }
+    }
+    else
+    {
+        syslog(LOG_ERR, "%s: Unable to open temp file %s: %s", __func__, fileName, strerror(errno));
+    }
+
+    // ERROR
+   if (fd >= 0) {
+        close(fd);
+    }
+    return false;
+}
+
+larodMap* CreatePreProcessMap(unsigned int streamWidth, unsigned int streamHeight, unsigned int inputWidth, unsigned int inputHeight)
+{
+  larodError* error = NULL;
+  larodMap* ppMap = larodCreateMap(&error);
+    if (!ppMap) {
+        syslog(LOG_ERR, "Could not create preprocessing larodMap %s", error->msg);
+        return nullptr;
+    }
+    if (!larodMapSetStr(ppMap, "image.input.format", "nv12", &error)) {
+        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", error->msg);
+        return nullptr;
+    }
+    if (!larodMapSetIntArr2(ppMap, "image.input.size", streamWidth, streamHeight, &error)) {
+        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", error->msg);
+        return nullptr;
+    }
+    if (!larodMapSetStr(ppMap, "image.output.format", "rgb-planar", &error)) {
+        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", error->msg);
+    return nullptr;
+    }
+    if (!larodMapSetIntArr2(ppMap, "image.output.size", inputWidth, inputHeight, &error)) {
+        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", error->msg);
+        return nullptr;
+    }
+    return ppMap;
+}
+
+larodMap* CreateCropMap(unsigned int clipX, unsigned int clipY, unsigned int clipW, unsigned int clipH)
+{
+  larodError* error = NULL;
+  larodMap* cropMap = larodCreateMap(&error);
+    if (!cropMap) {
+        syslog(LOG_ERR, "Could not create preprocessing crop larodMap %s", error->msg);
+        return nullptr;
+    }
+    if (!larodMapSetIntArr4(cropMap, "image.input.crop", clipX, clipY, clipW, clipH, &error)) {
+        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", error->msg);
+        return nullptr;
+    }
+    return cropMap;
+}
 
 int main(int argc, char* argv[])
 {
