@@ -18,7 +18,10 @@
 #include <syslog.h>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/video.hpp>
+#include <glib.h>
+#include <axoverlay.h>
 
+#include "larod.h"
 #include "SnowMeasurement/SnowMeasurement.h"
 #include "imgprovider.h"
 
