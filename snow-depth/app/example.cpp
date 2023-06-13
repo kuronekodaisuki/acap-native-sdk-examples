@@ -26,7 +26,7 @@ using namespace cv;
 
 int main(int argc, char* argv[])
 {
-  openlog("opencv_app", LOG_PID|LOG_CONS, LOG_USER);
+  openlog("snow_depth", LOG_PID|LOG_CONS, LOG_USER);
   syslog(LOG_INFO, "Running OpenCV example with VDO as video source");
   ImgProvider_t* provider = NULL;
 
