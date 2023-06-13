@@ -130,10 +130,33 @@ RUN . /opt/axis/acapsdk/environment-setup* && \
         .
 
 #
-# Build
+# Build Library
 #
 RUN make -j 8;
 RUN cp lib*.* ../lib/
+
+WORKDIR /opt/app
+
+# Get pretrained models
+ARG CHIP=
+RUN if [ "$CHIP" = cpu ] || [ "$CHIP" = artpec8 ]; then \
+        curl -L -o converted_model.tflite \
+            https://github.com/google-coral/test_data/raw/master/ssd_mobilenet_v2_coco_quant_postprocess.tflite ; \
+    elif [ "$CHIP" = edgetpu ]; then \
+        curl -L -o converted_model.tflite \
+            https://github.com/google-coral/test_data/raw/master/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite ; \
+    else \
+        printf "Error: '%s' is not a valid value for the CHIP variable\n", "$CHIP"; \
+        exit 1; \
+    fi
+
+# Download the labels
+RUN mkdir -p label && \
+    curl -L -o label/labels.txt https://github.com/google-coral/test_data/raw/master/coco_labels.txt
+
+# Setup the model directory
+RUN mkdir -p model && \
+    cp converted_model.tflite model/converted_model.tflite
 
 #-------------------------------------------------------------------------------
 # Finally build the ACAP application
@@ -141,4 +164,4 @@ RUN cp lib*.* ../lib/
 WORKDIR /opt/app
 
 RUN . /opt/axis/acapsdk/environment-setup* && acap-build .\
-    -a 'config/AXIS_Q6215-LE.xml'
+    -a 'config/AXIS_Q6215-LE.xml' -a 'label/labels.txt' -a 'model/converted_model.tflite'
