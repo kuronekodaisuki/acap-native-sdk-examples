@@ -11,6 +11,7 @@
                 "username": "sdk"
             },
             "vendorUrl": "https://www.axis.com",
+            "runOptions": "/usr/local/packages/snow_depth/config/AXIS_Q6215-LE.xml",
             "runMode": "never",
             "version": "1.0.0"
         }
