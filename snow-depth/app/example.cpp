@@ -32,6 +32,21 @@ int main(int argc, char* argv[])
 
 	// マーカーサイズ40センチ、ポール長さ24メートル
 	SnowDetector detector(SnowDetector::MARKER_6X6, 0.4f, 2.75f);
+  if (2 <= argc)
+  {
+    if (detector.LoadCameraParameters(argv[1]))
+      syslog(LOG_INFO, "%s loaded", argv[1]);
+    else
+      syslog(LOG_ERR, "%s failed to load", argv[1]);
+  }
+  else
+  {
+    syslog(LOG_INFO, "No camera parameter file");
+  }
+
+  Ptr<aruco::Dictionary> dictionary = aruco::getPredefinedDictionary(aruco::DICT_6X6_100);
+  std::vector<int> markerIds;
+  std::vector<std::vector<Point2f>> markerCorners;
 
   // The desired width and height of the BGR frame
   unsigned int width = 1024;
@@ -74,7 +89,8 @@ int main(int argc, char* argv[])
   Mat nv12_mat = Mat(height * 3 / 2, width, CV_8UC1);
   Mat fg;
 
-  while (true) {
+  while (true)
+  {
     // Get the latest NV12 image frame from VDO using the imageprovider
     VdoBuffer* buf = getLastFrameBlocking(provider);
     if (!buf) {
@@ -90,6 +106,22 @@ int main(int argc, char* argv[])
     // Convert the NV12 data to BGR
     cvtColor(nv12_mat, bgr_mat, COLOR_YUV2BGR_NV12, 3);
 
+    float depth = detector.Detect(bgr_mat);
+    syslog(LOG_INFO, "'%d': %f", detector.GetStatus(), depth);
+
+
+    aruco::detectMarkers(bgr_mat, dictionary, markerCorners, markerIds);
+    aruco::drawDetectedMarkers(bgr_mat, markerCorners);
+    if (0 < markerIds.size())
+    {
+      syslog(LOG_INFO, "%d Detect", markerIds[0]);
+    }
+    else
+    {
+      syslog(LOG_ERR, "Not Detected");
+    }
+
+    /*
     // Perform background subtraction on the bgr image with
     // learning rate 0.005. The resulting image should have
     // pixel intensities > 0 only where changes have occurred
@@ -105,6 +137,7 @@ int main(int argc, char* argv[])
     } else {
       syslog(LOG_INFO, "Motion detected: NO");
     }
+    */
 
     // Release the VDO frame buffer
     returnFrame(provider, buf);
