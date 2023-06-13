@@ -31,9 +31,19 @@ ARG OPENCV_DIR=${BUILD_DIR}/opencv
 ARG OPENCV_SRC_DIR=${OPENCV_DIR}/opencv-${OPENCV_VERSION}
 ARG OPENCV_BUILD_DIR=${OPENCV_DIR}/build
 
+#
+# OpenCV aruco module
+#
+COPY aruco ${OPENCV_SRC_DIR}/modules/aruco
+
 WORKDIR ${OPENCV_DIR}
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://github.com/opencv/opencv/archive/$OPENCV_VERSION.tar.gz | tar -xz
+
+COPY opencv/cap_axis_vdo.cpp modules/videoio/src
+COPY opencv/detect_axis_vdo.cmake modules/videoio/cmake
+COPY opencv/axisvdo-4.5.1.patch .
+#RUN patch -p 1 < axisvdo-4.5.1.patch
 
 WORKDIR ${OPENCV_BUILD_DIR}
 ENV COMMON_CMAKE_FLAGS="-S $OPENCV_SRC_DIR \
@@ -46,7 +56,7 @@ ENV COMMON_CMAKE_FLAGS="-S $OPENCV_SRC_DIR \
         -D WITH_FFMPEG=OFF \
         -D WITH_GSTREAMER=OFF \
         -D WITH_GSTREAMER_0_10=OFF \
-        -D BUILD_LIST=core,imgproc,video \
+        -D BUILD_LIST=aruco,calib3d,core,features2d,flann,imgproc,video \
         -D BUILD_EXAMPLES=OFF \
         -D BUILD_OPENCV_APPS=OFF \
         -D BUILD_DOCS=OFF \
@@ -105,5 +115,30 @@ RUN mkdir lib && \
 #-------------------------------------------------------------------------------
 # Finally build the ACAP application
 #-------------------------------------------------------------------------------
+WORKDIR /opt/app/SnowMeasurement
+#
+# build SnowMeasurement library
+#
+RUN . /opt/axis/acapsdk/environment-setup* && \
+    cmake \
+        -D CMAKE_CXX_COMPILER=${CXX%-g++*}-g++ \
+        -D CMAKE_CXX_FLAGS="${CXX#*-g++}" \
+        -D CMAKE_C_COMPILER=${CC%-gcc*}-gcc \
+        -D CMAKE_C_FLAGS="${CC#*-gcc}" \
+        -D OPENCV_INCLUDE_DIR=$SDK_LIB_PATH_BASE/include/opencv4 \
+        -D OPENCV_LIBRARIES=$SDK_LIB_PATH_BASE/lib \
+        .
 
-RUN . /opt/axis/acapsdk/environment-setup* && acap-build .
+#
+# Build
+#
+RUN make -j 8;
+RUN cp lib*.* ../lib/
+
+#-------------------------------------------------------------------------------
+# Finally build the ACAP application
+#-------------------------------------------------------------------------------
+WORKDIR /opt/app
+
+RUN . /opt/axis/acapsdk/environment-setup* && acap-build .\
+    -a 'config/AXIS_Q6215-LE.xml'
