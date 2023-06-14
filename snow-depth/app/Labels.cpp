@@ -86,7 +86,7 @@ size_t Labels::Load(const char* filename)
         fileReadPtr += numBytesRead;
     }
     */
-    read(labelsFd, labelsData, labelsFileSize);
+    ssize_t readed = read(labelsFd, labelsData, labelsFileSize);
     close(labelsFd);
 
     /*

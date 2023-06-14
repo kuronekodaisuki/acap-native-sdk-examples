@@ -7,6 +7,7 @@ public:
     ~Larod();
 
     bool LoadModel(const char* filename, const char* modelname = "inference");
+    bool PrepareInference(unsigned int width, unsigned int height, unsigned int channels = 3);
     bool DoInference();
 
 private:
@@ -16,6 +17,7 @@ private:
     const larodJobRequest* _request;
     larodTensor** _inputTensors;
     larodTensor** _outputTensors;
+    void** _mappedAddr;
     size_t _numInputs;
     size_t _numOutputs;
     larodError* _error;
