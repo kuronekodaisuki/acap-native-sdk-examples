@@ -25,6 +25,16 @@ Larod::Larod(const char* chip)
     }
 }
 
+Larod::~Larod()
+{
+  if (_connection)
+    larodDisconnect(&_connection, NULL);
+  if (_model)
+    larodDestroyModel(&_model);
+
+  larodClearError(&_error);
+}
+
 bool Larod::LoadModel(const char* filename)
 {
     // Create larod models
@@ -34,6 +44,7 @@ bool Larod::LoadModel(const char* filename)
     {
         _model = larodLoadModel(_connection, larodModelFd, _device, LAROD_ACCESS_PRIVATE,
                                  "object_detection", NULL, &_error);
+        close(larodModelFd);
         if (!_model)
         {
           syslog(LOG_ERR, "%s: Unable to load model: %s", __func__, _error->msg);
@@ -47,4 +58,17 @@ bool Larod::LoadModel(const char* filename)
         syslog(LOG_ERR, "Unable to open model file %s: %s", filename, strerror(errno));
         return false;
     }
+}
+
+bool Larod::DoInference()
+{
+  if (_connection && _request)
+  {
+    return larodRunJob(_connection, _request, &_error);
+  }
+  else
+  {
+    syslog(LOG_ERR, "Failed to Inference");
+    return false;
+  }
 }
