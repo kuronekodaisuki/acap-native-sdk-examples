@@ -42,14 +42,25 @@ Larod::Larod(const char* chip)
 
 Larod::~Larod()
 {
-  if (_connection)
-    larodDisconnect(&_connection, NULL);
   if (_model)
+  {
+    larodDestroyTensors(_connection, &_inputTensors, _numInputs, &_error);
+    larodDestroyTensors(_connection, &_outputTensors, _numOutputs, &_error);
     larodDestroyModel(&_model);
+  }
+  if (_connection)
+  {
+    larodDisconnect(&_connection, NULL);
+  }
+
 
   larodClearError(&_error);
 }
 
+/// @brief Load model and get Inputs and Outputs Tensors
+/// @param filename
+/// @param modelname
+/// @return
 bool Larod::LoadModel(const char* filename, const char* modelname)
 {
     // Create larod models
@@ -68,6 +79,15 @@ bool Larod::LoadModel(const char* filename, const char* modelname)
         else
         {
           syslog(LOG_INFO, "Model %s loaded", filename);
+
+          _inputTensors = larodCreateModelInputs(_model, &_numInputs, &_error);
+          _outputTensors = larodCreateModelOutputs(_model, &_numOutputs, &_error);
+          syslog(LOG_INFO, "%d inputs, %d outputs", _numInputs, _numOutputs);
+
+          _request = larodCreateJobRequest(_model,
+                                         _inputTensors, _numInputs,
+                                         _outputTensors, _numOutputs,
+                                         NULL, &_error);
           return true;
         }
     }

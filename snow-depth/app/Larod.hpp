@@ -14,5 +14,9 @@ private:
     larodModel* _model;
     const larodDevice* _device;
     const larodJobRequest* _request;
+    larodTensor** _inputTensors;
+    larodTensor** _outputTensors;
+    size_t _numInputs;
+    size_t _numOutputs;
     larodError* _error;
 };

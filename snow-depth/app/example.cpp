@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <iostream>
+#include <fstream>
 #include <stdlib.h>
 #include <syslog.h>
 #include <sys/mman.h>
@@ -32,6 +33,14 @@
 
 using namespace cv;
 
+void readConfig(const char* filename)
+{
+  FileStorage config;
+  if (config.open(filename, FileStorage::FORMAT_JSON))
+  {
+    config["filename"];
+  }
+}
 
 int main(int argc, char* argv[])
 {
