@@ -3,7 +3,7 @@
 class Larod
 {
 public:
-    Larod(const char* chip = "cpu");
+    Larod(const char* chip = "cpu-tflite");
     ~Larod();
 
     bool LoadModel(const char* filename);
