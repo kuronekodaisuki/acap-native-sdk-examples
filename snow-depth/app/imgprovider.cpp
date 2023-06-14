@@ -220,7 +220,8 @@ errorExit:
 
 bool chooseStreamResolution(unsigned int reqWidth, unsigned int reqHeight,
                             unsigned int* chosenWidth,
-                            unsigned int* chosenHeight) {
+                            unsigned int* chosenHeight)
+{
     VdoResolutionSet* set = NULL;
     VdoChannel* channel = NULL;
     GError* error = NULL;
@@ -231,32 +232,36 @@ bool chooseStreamResolution(unsigned int reqWidth, unsigned int reqHeight,
 
     // Retrieve channel resolutions
     channel = vdo_channel_get(VDO_CHANNEL, &error);
-    if (!channel) {
+    if (!channel)
+    {
         syslog(LOG_ERR, "%s: Failed vdo_channel_get(): %s", __func__,
                  (error != NULL) ? error->message : "N/A");
-    g_clear_object(&channel);
-    g_free(set);
-    g_clear_error(&error);
+      g_clear_object(&channel);
+      g_free(set);
+      g_clear_error(&error);
     }
     // We filter on resolutions that are supported for VDO_FORMAT_YUV
     g_autoptr(VdoMap) filter = vdo_map_new();
     vdo_map_set_uint32(filter, "format", VDO_FORMAT_YUV);
     vdo_map_set_string(filter, "select", "all");
     set = vdo_channel_get_resolutions(channel, filter, &error);
-    if (!set) {
+    if (!set)
+    {
         syslog(LOG_ERR, "%s: Failed vdo_channel_get_resolutions(): %s", __func__,
                  (error != NULL) ? error->message : "N/A");
-    g_clear_object(&channel);
-    g_free(set);
-    g_clear_error(&error);
+      g_clear_object(&channel);
+      g_free(set);
+      g_clear_error(&error);
     }
 
     // Find smallest VDO stream resolution that fits the requested size.
     ssize_t bestResolutionIdx = -1;
     unsigned int bestResolutionArea = UINT_MAX;
-    for (ssize_t i = 0; (gsize) i < set->count; ++i) {
+    for (ssize_t i = 0; (gsize) i < set->count; ++i)
+    {
         VdoResolution* res = &set->resolutions[i];
-        if ((res->width >= reqWidth) && (res->height >= reqHeight)) {
+        if ((res->width >= reqWidth) && (res->height >= reqHeight))
+        {
             unsigned int area = res->width * res->height;
             if (area < bestResolutionArea) {
                 bestResolutionIdx = i;
@@ -270,12 +275,14 @@ bool chooseStreamResolution(unsigned int reqWidth, unsigned int reqHeight,
     // fall back to trying to create a stream with client-supplied w/h.
     *chosenWidth = reqWidth;
     *chosenWidth = reqHeight;
-    if (bestResolutionIdx >= 0) {
+    if (bestResolutionIdx >= 0)
+    {
         *chosenWidth = set->resolutions[bestResolutionIdx].width;
         *chosenHeight = set->resolutions[bestResolutionIdx].height;
         syslog(LOG_INFO, "%s: We select stream w/h=%u x %u based on VDO channel info.\n",
                 __func__, *chosenWidth, *chosenHeight);
-    } else {
+    } else
+    {
         syslog(LOG_WARNING, "%s: VDO channel info contains no reslution info. Fallback "
                    "to client-requested stream resolution.",
                    __func__);
@@ -291,11 +298,12 @@ bool createStream(ImgProvider_t* provider, unsigned int w, unsigned int h) {
     GError* error = NULL;
     bool ret = false;
 
-    if (!vdoMap) {
+    if (!vdoMap)
+    {
         syslog(LOG_ERR, "%s: Failed to create vdo_map", __func__);
-    g_object_unref(vdoMap);
-    g_clear_error(&error);
-    return ret;
+        g_object_unref(vdoMap);
+        g_clear_error(&error);
+        return ret;
     }
 
     vdo_map_set_uint32(vdoMap, "channel", VDO_CHANNEL);
@@ -309,23 +317,25 @@ bool createStream(ImgProvider_t* provider, unsigned int w, unsigned int h) {
     vdo_map_dump(vdoMap);
 
     VdoStream* vdoStream = vdo_stream_new(vdoMap, NULL, &error);
-    if (!vdoStream) {
-        syslog(LOG_ERR, "%s: Failed creating vdo stream: %s", __func__,
+    if (!vdoStream)
+    {
+      syslog(LOG_ERR, "%s: Failed creating vdo stream: %s", __func__,
                  (error != NULL) ? error->message : "N/A");
-    releaseVdoBuffers(provider);
+      releaseVdoBuffers(provider);
     }
 
-    if (!allocateVdoBuffers(provider, vdoStream)) {
+    if (!allocateVdoBuffers(provider, vdoStream))
+    {
         syslog(LOG_ERR, "%s: Failed setting up VDO buffers!", __func__);
-    releaseVdoBuffers(provider);
+      releaseVdoBuffers(provider);
     }
 
     // Start the actual VDO streaming.
-    if (!vdo_stream_start(vdoStream, &error)) {
+    if (!vdo_stream_start(vdoStream, &error))
+    {
         syslog(LOG_ERR, "%s: Failed starting stream: %s", __func__,
                  (error != NULL) ? error->message : "N/A");
-    releaseVdoBuffers(provider);
-
+      releaseVdoBuffers(provider);
     }
 
     provider->vdoStream = vdoStream;
@@ -335,15 +345,17 @@ bool createStream(ImgProvider_t* provider, unsigned int w, unsigned int h) {
     g_object_unref(vdoMap);
     g_clear_error(&error);
     return ret;
-
 }
 
-static void releaseVdoBuffers(ImgProvider_t* provider) {
-    if (!provider->vdoStream) {
+static void releaseVdoBuffers(ImgProvider_t* provider)
+{
+    if (!provider->vdoStream)
+    {
         return;
     }
 
-    for (size_t i = 0; i < NUM_VDO_BUFFERS; i++) {
+    for (size_t i = 0; i < NUM_VDO_BUFFERS; i++)
+    {
         if (provider->vdoBuffers[i] != NULL) {
             vdo_stream_buffer_unref(provider->vdoStream,
                                     &provider->vdoBuffers[i], NULL);
@@ -351,13 +363,15 @@ static void releaseVdoBuffers(ImgProvider_t* provider) {
     }
 }
 
-VdoBuffer* getLastFrameBlocking(ImgProvider_t* provider) {
+VdoBuffer* getLastFrameBlocking(ImgProvider_t* provider)
+{
     VdoBuffer* returnBuf = NULL;
     pthread_mutex_lock(&provider->frameMutex);
 
-    while (g_queue_get_length(provider->deliveredFrames) < 1) {
-        if (pthread_cond_wait(&provider->frameDeliverCond,
-                              &provider->frameMutex)) {
+    while (g_queue_get_length(provider->deliveredFrames) < 1)
+    {
+        if (pthread_cond_wait(&provider->frameDeliverCond, &provider->frameMutex))
+        {
             syslog(LOG_ERR, "%s: Failed to wait on condition: %s", __func__,
                      strerror(errno));
             goto errorExit;
@@ -372,7 +386,8 @@ errorExit:
     return returnBuf;
 }
 
-void returnFrame(ImgProvider_t* provider, VdoBuffer* buffer) {
+void returnFrame(ImgProvider_t* provider, VdoBuffer* buffer)
+{
     pthread_mutex_lock(&provider->frameMutex);
 
     g_queue_push_tail(provider->processedFrames, buffer);
@@ -380,16 +395,19 @@ void returnFrame(ImgProvider_t* provider, VdoBuffer* buffer) {
     pthread_mutex_unlock(&provider->frameMutex);
 }
 
-static void* threadEntry(void* data) {
+static void* threadEntry(void* data)
+{
     GError* error = NULL;
     ImgProvider_t* provider = (ImgProvider_t*) data;
 
-    while (!provider->shutDown) {
+    while (!provider->shutDown)
+    {
         // Block waiting for a frame from VDO
         VdoBuffer* newBuffer =
             vdo_stream_get_buffer(provider->vdoStream, &error);
 
-        if (!newBuffer) {
+        if (!newBuffer)
+        {
             // Fail but we continue anyway hoping for the best.
             syslog(LOG_WARNING, "%s: Failed fetching frame from vdo: %s", __func__,
                        (error != NULL) ? error->message : "N/A");
@@ -404,21 +422,24 @@ static void* threadEntry(void* data) {
 
         // First check if there are any frames returned from app
         // processing
-        if (g_queue_get_length(provider->processedFrames) > 0) {
+        if (g_queue_get_length(provider->processedFrames) > 0)
+        {
             oldBuffer = (VdoBuffer*) g_queue_pop_head(provider->processedFrames);
-        } else {
+        } else
+        {
             // Client specifies the number-of-recent-frames it needs to collect
             // in one chunk (numAppFrames). Thus only enqueue buffers back to
             // VDO if we have collected more buffers than numAppFrames.
-            if (g_queue_get_length(provider->deliveredFrames) >
-                provider->numAppFrames) {
+            if (g_queue_get_length(provider->deliveredFrames) > provider->numAppFrames)
+            {
                 oldBuffer = (VdoBuffer*) g_queue_pop_head(provider->deliveredFrames);
             }
         }
 
-        if (oldBuffer) {
-            if (!vdo_stream_buffer_enqueue(provider->vdoStream, oldBuffer,
-                                           &error)) {
+        if (oldBuffer)
+        {
+            if (!vdo_stream_buffer_enqueue(provider->vdoStream, oldBuffer, &error))
+            {
                 // Fail but we continue anyway hoping for the best.
                 syslog(LOG_WARNING, "%s: Failed enqueueing buffer to vdo: %s", __func__,
                            (error != NULL) ? error->message : "N/A");
@@ -432,8 +453,10 @@ static void* threadEntry(void* data) {
   return NULL;
 }
 
-bool startFrameFetch(ImgProvider_t* provider) {
-    if (pthread_create(&provider->fetcherThread, NULL, threadEntry, provider)) {
+bool startFrameFetch(ImgProvider_t* provider)
+{
+    if (pthread_create(&provider->fetcherThread, NULL, threadEntry, provider))
+    {
         syslog(LOG_ERR, "%s: Failed to start thread fetching frames from vdo: %s",
                  __func__, strerror(errno));
         return false;
@@ -442,10 +465,12 @@ bool startFrameFetch(ImgProvider_t* provider) {
     return true;
 }
 
-bool stopFrameFetch(ImgProvider_t* provider) {
+bool stopFrameFetch(ImgProvider_t* provider)
+{
     provider->shutDown = true;
 
-    if (pthread_join(provider->fetcherThread, NULL)) {
+    if (pthread_join(provider->fetcherThread, NULL))
+    {
         syslog(LOG_ERR, "%s: Failed to join thread fetching frames from vdo: %s",
                  __func__, strerror(errno));
         return false;

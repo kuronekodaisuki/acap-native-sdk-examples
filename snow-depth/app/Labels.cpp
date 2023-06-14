@@ -13,7 +13,7 @@ const char*Labels::operator[](unsigned int index)
 {
     if (index < _labels.size())
         return _labels[index].c_str();
-    else 
+    else
         return nullptr;
 }
 
@@ -28,7 +28,7 @@ const char*Labels::operator[](unsigned int index)
  * @param numLabelsPtr Pointer to number which will store number of labels read.
  * @return False if any errors occur, otherwise true.
  */
-size_t Labels::Load(const char* filename) 
+size_t Labels::Load(const char* filename)
 {
     // We cut off every row at 60 characters.
     const size_t LINE_MAX_LEN = 60;
@@ -39,7 +39,7 @@ size_t Labels::Load(const char* filename)
     struct stat fileStats = { 0 };
     if (stat(filename, &fileStats) < 0) {
         syslog(LOG_ERR, "%s: Unable to get stats for label file %s: %s", __func__,
-            labelsPath, strerror(errno));
+            filename, strerror(errno));
         return false;
     }
 
@@ -64,7 +64,7 @@ size_t Labels::Load(const char* filename)
 
     int labelsFd = open(filename, O_RDONLY);
     if (labelsFd < 0) {
-        syslog(LOG_ERR, "%s: Could not open labels file %s: %s", __func__, labelsPath,
+        syslog(LOG_ERR, "%s: Could not open labels file %s: %s", __func__, filename,
             strerror(errno));
         return 0;
     }
@@ -73,7 +73,7 @@ size_t Labels::Load(const char* filename)
     size_t numBytesRead = -1;
     size_t totalBytesRead = 0;
     char* fileReadPtr = labelsData;
-    while (totalBytesRead < labelsFileSize) 
+    while (totalBytesRead < labelsFileSize)
     {
         numBytesRead = read(labelsFd, fileReadPtr, labelsFileSize - totalBytesRead);
 
@@ -93,7 +93,7 @@ size_t Labels::Load(const char* filename)
     // Now count number of lines in the file - check all bytes except the last
     // one in the file.
     size_t numLines = 0;
-    for (size_t i = 0; i < (labelsFileSize - 1); i++) 
+    for (size_t i = 0; i < (labelsFileSize - 1); i++)
     {
         if (labelsData[i] == '\n') {
             numLines++;
@@ -110,9 +110,9 @@ size_t Labels::Load(const char* filename)
     //labelArray[labelIdx] = labelsData;
     //labelIdx++;
     size_t delimiter = 0;
-    for (size_t i = 0; i < labelsFileSize; i++) 
+    for (size_t i = 0; i < labelsFileSize; i++)
     {
-        if (labelsData[i] == '\n') 
+        if (labelsData[i] == '\n')
         {
             std::string label(&labelsData[delimiter], i - delimiter);
             _labels.push_back(label);
@@ -140,7 +140,7 @@ size_t Labels::Load(const char* filename)
     labelsData[labelsFileSize] = '\0';
 
     // Now go through the list of strings and cap if strings too long.
-    for (size_t i = 0; i < numLines; i++) 
+    for (size_t i = 0; i < numLines; i++)
     {
         size_t stringLen = strnlen(labelArray[i], LINE_MAX_LEN);
         if (stringLen >= LINE_MAX_LEN) {

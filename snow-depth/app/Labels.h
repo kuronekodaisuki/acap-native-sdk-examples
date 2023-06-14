@@ -16,6 +16,7 @@
 #define API
 #include <unistd.h>
 #include <syslog.h>
+#include <string.h>
 #endif
 
 class API Labels
