@@ -6,7 +6,7 @@ public:
     Larod(const char* chip = "cpu-tflite");
     ~Larod();
 
-    bool LoadModel(const char* filename);
+    bool LoadModel(const char* filename, const char* modelname = "inference");
     bool DoInference();
 
 private:

@@ -40,6 +40,7 @@ int main(int argc, char* argv[])
   ImgProvider_t* provider = NULL;
 
   Larod larod;
+  larod.LoadModel("model/converted_model.tflite");
 
 	// マーカーサイズ40センチ、ポール長さ24メートル
 	SnowDetector detector(SnowDetector::MARKER_6X6, 0.4f, 2.75f);

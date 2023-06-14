@@ -50,7 +50,7 @@ Larod::~Larod()
   larodClearError(&_error);
 }
 
-bool Larod::LoadModel(const char* filename)
+bool Larod::LoadModel(const char* filename, const char* modelname)
 {
     // Create larod models
     syslog(LOG_INFO, "Create larod models");
@@ -58,7 +58,7 @@ bool Larod::LoadModel(const char* filename)
     if (0 <= larodModelFd)
     {
         _model = larodLoadModel(_connection, larodModelFd, _device, LAROD_ACCESS_PRIVATE,
-                                 "object_detection", NULL, &_error);
+                                 modelname, NULL, &_error);
         close(larodModelFd);
         if (!_model)
         {
@@ -66,7 +66,10 @@ bool Larod::LoadModel(const char* filename)
           return false;
         }
         else
+        {
+          syslog(LOG_INFO, "Model %s loaded", filename);
           return true;
+        }
     }
     else
     {
