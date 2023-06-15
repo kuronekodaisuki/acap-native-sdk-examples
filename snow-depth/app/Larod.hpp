@@ -6,17 +6,19 @@
 class Larod
 {
 public:
-    Larod(const char* chip = "cpu-tflite");
+    Larod(size_t streamWidth, size_t streamHeight, const char* chip = "cpu-tflite");
     ~Larod();
 
     bool LoadModel(const char* filename, size_t width, size_t height, size_t channels = 3, const char* modelname = "inference");
 
-    bool PreProcessModel(size_t streamWidth, size_t streamHeight);
+    bool PreProcessModel();
 
     bool DoInference();
 
 private:
     const char* _chip;
+    size_t _streamWidth;
+    size_t _streamHeight;
     size_t _modelWidth;
     size_t _modelHeight;
     const larodDevice* _device;

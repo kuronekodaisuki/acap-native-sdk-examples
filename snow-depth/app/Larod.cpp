@@ -32,7 +32,8 @@ char CROP_FILE_PATTERN[] = "/tmp/crop.test-XXXXXX";
 
 /// @brief Constructor
 /// @param chip
-Larod::Larod(const char* chip): _chip(chip)
+Larod::Larod(size_t streamWidth, size_t streamHeight, const char* chip):
+_streamWidth(streamWidth), _streamHeight(streamHeight), _chip(chip)
 {
     // Set up larod connection.
     if (larodConnect(&_connection, &_error))
@@ -161,7 +162,7 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
     }
 }
 
-bool Larod::PreProcessModel(size_t streamWidth, size_t streamHeight)
+bool Larod::PreProcessModel()
 {
     // Calculate crop image
     // 1. The crop area shall fill the input image either horizontally or
@@ -169,16 +170,16 @@ bool Larod::PreProcessModel(size_t streamWidth, size_t streamHeight)
     // 2. The crop area shall have the same aspect ratio as the output image.
     syslog(LOG_INFO, "Calculate crop image");
     float destWHratio = (float) _modelWidth / (float) _modelHeight;
-    float cropW = (float) streamWidth;
+    float cropW = (float) _streamWidth;
     float cropH = cropW / destWHratio;
-    if (cropH > (float) streamHeight) {
-        cropH = (float) streamHeight;
+    if (cropH > (float) _streamHeight) {
+        cropH = (float) _streamHeight;
         cropW = cropH * destWHratio;
     }
     unsigned int clipW = (unsigned int)cropW;
     unsigned int clipH = (unsigned int)cropH;
-    unsigned int clipX = (streamWidth - clipW) / 2;
-    unsigned int clipY = (streamHeight - clipH) / 2;
+    unsigned int clipX = (_streamWidth - clipW) / 2;
+    unsigned int clipY = (_streamHeight - clipH) / 2;
     syslog(LOG_INFO, "Crop VDO image X=%d Y=%d (%d x %d)", clipX, clipY, clipW, clipH);
 
     // Create preprocessing maps
@@ -192,7 +193,7 @@ bool Larod::PreProcessModel(size_t streamWidth, size_t streamHeight)
         syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", _error->msg);
         return false;
     }
-    if (!larodMapSetIntArr2(_ppMap, "image.input.size", streamWidth, streamHeight, &_error)) {
+    if (!larodMapSetIntArr2(_ppMap, "image.input.size", _streamWidth, _streamHeight, &_error)) {
         syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", _error->msg);
         return false;
     }

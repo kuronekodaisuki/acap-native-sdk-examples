@@ -51,9 +51,6 @@ int main(int argc, char* argv[])
   syslog(LOG_INFO, "Running OpenCV example with VDO as video source");
   ImgProvider_t* provider = NULL;
 
-  Larod larod;
-  larod.LoadModel("model/converted_model.tflite", 300, 300);
-
 	// マーカーサイズ40センチ、ポール長さ24メートル
 	SnowDetector detector(SnowDetector::MARKER_6X6, 0.4f, 2.75f);
   if (2 <= argc)
@@ -88,6 +85,11 @@ int main(int argc, char* argv[])
 
   syslog(LOG_INFO, "Creating VDO image provider and creating stream %d x %d",
           streamWidth, streamHeight);
+
+  Larod larod(streamWidth, streamHeight);
+  larod.LoadModel("model/converted_model.tflite", 300, 300);
+
+
   provider = createImgProvider(streamWidth, streamHeight, 2, VDO_FORMAT_YUV);
   if (!provider) {
     syslog(LOG_ERR, "%s: Failed to create ImgProvider", __func__);
