@@ -65,6 +65,8 @@ Larod::~Larod()
 {
   if (_model)
   {
+    delete _preProcess;
+    delete _crop;
     larodDestroyTensors(_connection, &_inputTensors, _numInputs, &_error);
     larodDestroyTensors(_connection, &_outputTensors, _numOutputs, &_error);
     larodDestroyModel(&_model);
@@ -260,10 +262,10 @@ bool Larod::PreProcessModel(size_t streamWidth, size_t streamHeight)
     }
     //outputBufferSize = outputPitches->pitches[0];
 
-    /*
-    _preProcess = Map(CONV_PP_FILE_PATTERN, yuyvBufferSize);
-    _crop = Map(CROP_FILE_PATTERN, rawWidth * rawHeight * CHANNELS);
+    _preProcess = new Map(yuyvBufferSize, CONV_PP_FILE_PATTERN);
+    //_crop = new Map(rawWidth * rawHeight * CHANNELS, CROP_FILE_PATTERN);
 
+/*
     // Connect tensors to file descriptors
     syslog(LOG_INFO, "Connect tensors to file descriptors");
     if (!larodSetTensorFd(_ppInputTensors[0], ppInputFd, &_error)) {
@@ -274,7 +276,7 @@ bool Larod::PreProcessModel(size_t streamWidth, size_t streamHeight)
         syslog(LOG_ERR, "Failed setting input tensor fd: %s", _error->msg);
         return false;
     }
-    */
+*/
 
     // Create job requests
     syslog(LOG_INFO, "Create job requests");

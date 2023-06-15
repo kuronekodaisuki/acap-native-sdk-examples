@@ -33,8 +33,8 @@ private:
     larodTensor** _ppOutputTensors;
     size_t _numInputs;
     size_t _numOutputs;
-    //Map _preProcess;
-    //Map _crop;
+    Map* _preProcess = nullptr;
+    Map* _crop = nullptr;
     std::vector<Map> _inputs;
     std::vector<Map> _outputs;
     larodError* _error;
