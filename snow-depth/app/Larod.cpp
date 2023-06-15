@@ -13,11 +13,11 @@
 #include "Larod.hpp"
 
 // Name patterns for the temp file we will create.
-const char CONV_INP_FILE_PATTERN[] = "/tmp/larod.in.test-XXXXXX";
-const char CONV_OUT1_FILE_PATTERN[] = "/tmp/larod.out1.test-XXXXXX";
-const char CONV_OUT2_FILE_PATTERN[] = "/tmp/larod.out2.test-XXXXXX";
-const char CONV_OUT3_FILE_PATTERN[] = "/tmp/larod.out3.test-XXXXXX";
-const char CONV_OUT4_FILE_PATTERN[] = "/tmp/larod.out4.test-XXXXXX";
+char CONV_INP_FILE_PATTERN[] = "/tmp/larod.in.test-XXXXXX";
+char CONV_OUT1_FILE_PATTERN[] = "/tmp/larod.out1.test-XXXXXX";
+char CONV_OUT2_FILE_PATTERN[] = "/tmp/larod.out2.test-XXXXXX";
+char CONV_OUT3_FILE_PATTERN[] = "/tmp/larod.out3.test-XXXXXX";
+char CONV_OUT4_FILE_PATTERN[] = "/tmp/larod.out4.test-XXXXXX";
 //char CONV_PP_FILE_PATTERN[] = "/tmp/larod.pp.test-XXXXXX";
 //char CROP_FILE_PATTERN[] = "/tmp/crop.test-XXXXXX";
 
@@ -65,10 +65,10 @@ Larod::~Larod()
     {
       _inputs.pop_back();
     }
-    for (size_t i = 0; i < _numOutputs; i++)
-    {
-      _outputs.pop_back();
-    }
+    //for (size_t i = 0; i < _numOutputs; i++)
+    //{
+    //  _outputs.pop_back();
+    //}
   }
   if (_connection)
   {
@@ -107,6 +107,7 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
 
           _inputTensors = larodCreateModelInputs(_model, &_numInputs, &_error);
           _outputTensors = larodCreateModelOutputs(_model, &_numOutputs, &_error);
+          _inputs.push_back(Map(width * height * channels, CONV_INP_FILE_PATTERN));
           for (size_t i = 0; i < _numInputs; i++)
           {
             //_inputs.push_back(Map());

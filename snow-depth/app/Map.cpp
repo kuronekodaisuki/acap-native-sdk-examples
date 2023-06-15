@@ -11,7 +11,7 @@
 
 #include "Map.hpp"
 
-Map::Map(size_t fileSize, char* fileName): _size(fileSize)
+Map::Map(size_t fileSize, char* fileName): _size(fileSize), _filename(fileName)
 {
     syslog(LOG_INFO, "%s: Setting up a temp fd with pattern %s and size %zu", __func__,
            fileName, fileSize);
@@ -57,6 +57,7 @@ Map::Map(size_t fileSize, char* fileName): _size(fileSize)
 
 Map::~Map()
 {
+  syslog(LOG_INFO, "Map deleted size:%d file:%s", _size, _filename);
   if (_mappedAddr != nullptr)
     munmap(_mappedAddr, _size);
   if (0 <= _handle)
