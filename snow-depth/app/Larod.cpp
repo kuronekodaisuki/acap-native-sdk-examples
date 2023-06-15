@@ -60,15 +60,15 @@ Larod::~Larod()
   {
     larodDestroyTensors(_connection, &_inputTensors, _numInputs, &_error);
     larodDestroyTensors(_connection, &_outputTensors, _numOutputs, &_error);
-    if (_mappedAddr)
-    {
-      for (size_t i = 0; i < (_numInputs + _numOutputs); i++)
-      {
-        //munmap(_mappedAddr[i]);
-      }
-      delete[] _mappedAddr;
-    }
     larodDestroyModel(&_model);
+    for (size_t i = 0; i < _numInputs; i++)
+    {
+      _inputs.pop_back();
+    }
+    for (size_t i = 0; i < _numOutputs; i++)
+    {
+      _outputs.pop_back();
+    }
   }
   if (_connection)
   {
@@ -81,9 +81,12 @@ Larod::~Larod()
 
 /// @brief Load model and get Inputs and Outputs Tensors
 /// @param filename
+/// @param width
+/// @param height
+/// @param channels
 /// @param modelname
 /// @return
-bool Larod::LoadModel(const char* filename, const char* modelname)
+bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t channels, const char* modelname)
 {
     // Create larod models
     syslog(LOG_INFO, "Create larod models");
@@ -104,9 +107,27 @@ bool Larod::LoadModel(const char* filename, const char* modelname)
 
           _inputTensors = larodCreateModelInputs(_model, &_numInputs, &_error);
           _outputTensors = larodCreateModelOutputs(_model, &_numOutputs, &_error);
-          _mappedAddr = new void*[_numInputs + _numOutputs];
+          for (size_t i = 0; i < _numInputs; i++)
+          {
+            //_inputs.push_back(Map());
+          }
+          for (size_t i = 0; i < _numOutputs; i++)
+          {
+            //_outputs.push_back(Map());
+          }
           syslog(LOG_INFO, "%d inputs, %d outputs", _numInputs, _numOutputs);
 
+          _request = larodCreateJobRequest(_model,
+                                          _inputTensors, _numInputs,
+                                          _outputTensors, _numOutputs,
+                                          NULL, &_error);
+          if (_request)
+          {
+            for (size_t i = 0; i < _numInputs; i++)
+            {
+              //createAndMapTmpFile(CONV_INP_FILE_PATTERN, width * height * channels, )
+            }
+          }
           return true;
         }
     }
@@ -115,28 +136,6 @@ bool Larod::LoadModel(const char* filename, const char* modelname)
         syslog(LOG_ERR, "Unable to open model file %s: %s", filename, strerror(errno));
         return false;
     }
-}
-
-/// @brief Prepare input and output tensors
-/// @return
-bool Larod::PrepareInference(unsigned int width, unsigned int height, unsigned int channels)
-{
-  _request = larodCreateJobRequest(_model,
-                                   _inputTensors, _numInputs,
-                                   _outputTensors, _numOutputs,
-                                   NULL, &_error);
-  if (_request)
-  {
-    for (size_t i = 0; i < _numInputs; i++)
-    {
-      //createAndMapTmpFile(CONV_INP_FILE_PATTERN, width * height * channels, )
-    }
-    return true;
-  }
-  else
-  {
-    return false;
-  }
 }
 
 /// @brief Do Inference
@@ -154,56 +153,6 @@ bool Larod::DoInference()
   }
 }
 
-bool createAndMapTmpFile(char* fileName, size_t fileSize, void** mappedAddr, int* convFd)
-{
-    syslog(LOG_INFO, "%s: Setting up a temp fd with pattern %s and size %zu", __func__,
-           fileName, fileSize);
-
-    int fd = mkstemp(fileName);
-    if (0 <= fd)
-    {
-      // Allocate enough space in for the fd.
-      if (0 <= ftruncate(fd, (off_t) fileSize))
-      {
-        // Remove since we don't actually care about writing to the file system.
-        if (!unlink(fileName))
-        {
-          // Get an address to fd's memory for this process's memory space.
-          void* data = mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-
-          if (data != MAP_FAILED)
-          {
-            // SUCCESS
-            *mappedAddr = data;
-            *convFd = fd;
-            return true;
-          }
-          else
-          {
-              syslog(LOG_ERR, "%s: Unable to mmap temp file %s: %s", __func__, fileName, strerror(errno));
-          }
-        }
-        else
-        {
-            syslog(LOG_ERR, "%s: Unable to unlink from temp file %s: %s", __func__, fileName, strerror(errno));
-        }
-      }
-      else
-      {
-          syslog(LOG_ERR, "%s: Unable to truncate temp file %s: %s", __func__, fileName, strerror(errno));
-      }
-    }
-    else
-    {
-        syslog(LOG_ERR, "%s: Unable to open temp file %s: %s", __func__, fileName, strerror(errno));
-    }
-
-    // ERROR
-   if (fd >= 0) {
-        close(fd);
-    }
-    return false;
-}
 
 larodMap* CreatePreProcessMap(unsigned int streamWidth, unsigned int streamHeight, unsigned int inputWidth, unsigned int inputHeight)
 {

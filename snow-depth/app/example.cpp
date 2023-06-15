@@ -33,11 +33,14 @@
 
 using namespace cv;
 
+/// @brief Decode JSON data
+/// @param filename
 void readConfig(const char* filename)
 {
   FileStorage config;
   if (config.open(filename, FileStorage::FORMAT_JSON))
   {
+    // TODO
     config["filename"];
   }
 }
@@ -49,7 +52,7 @@ int main(int argc, char* argv[])
   ImgProvider_t* provider = NULL;
 
   Larod larod;
-  larod.LoadModel("model/converted_model.tflite");
+  larod.LoadModel("model/converted_model.tflite", 300, 300);
 
 	// マーカーサイズ40センチ、ポール長さ24メートル
 	SnowDetector detector(SnowDetector::MARKER_6X6, 0.4f, 2.75f);

@@ -1,4 +1,7 @@
+#include <vector>
 #include "larod.h"
+
+#include "Map.hpp"
 
 class Larod
 {
@@ -6,8 +9,8 @@ public:
     Larod(const char* chip = "cpu-tflite");
     ~Larod();
 
-    bool LoadModel(const char* filename, const char* modelname = "inference");
-    bool PrepareInference(unsigned int width, unsigned int height, unsigned int channels = 3);
+    bool LoadModel(const char* filename, size_t width, size_t height, size_t channels = 3, const char* modelname = "inference");
+
     bool DoInference();
 
 private:
@@ -17,8 +20,9 @@ private:
     const larodJobRequest* _request;
     larodTensor** _inputTensors;
     larodTensor** _outputTensors;
-    void** _mappedAddr;
     size_t _numInputs;
     size_t _numOutputs;
+    std::vector<Map> _inputs;
+    std::vector<Map> _outputs;
     larodError* _error;
 };
