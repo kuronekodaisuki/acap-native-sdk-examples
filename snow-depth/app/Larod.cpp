@@ -27,14 +27,12 @@ char CONV_OUT1_FILE_PATTERN[] = "/tmp/larod.out1.test-XXXXXX";
 char CONV_OUT2_FILE_PATTERN[] = "/tmp/larod.out2.test-XXXXXX";
 char CONV_OUT3_FILE_PATTERN[] = "/tmp/larod.out3.test-XXXXXX";
 char CONV_OUT4_FILE_PATTERN[] = "/tmp/larod.out4.test-XXXXXX";
-//char CONV_PP_FILE_PATTERN[] = "/tmp/larod.pp.test-XXXXXX";
-//char CROP_FILE_PATTERN[] = "/tmp/crop.test-XXXXXX";
-
-bool createAndMapTmpFile(char* fileName, size_t fileSize, void** mappedAddr, int* convFd);
+char CONV_PP_FILE_PATTERN[] = "/tmp/larod.pp.test-XXXXXX";
+char CROP_FILE_PATTERN[] = "/tmp/crop.test-XXXXXX";
 
 /// @brief Constructor
 /// @param chip
-Larod::Larod(const char* chip)
+Larod::Larod(const char* chip): _chip(chip)
 {
     // Set up larod connection.
     if (larodConnect(&_connection, &_error))
@@ -84,7 +82,6 @@ Larod::~Larod()
     larodDisconnect(&_connection, NULL);
   }
 
-
   larodClearError(&_error);
 }
 
@@ -97,6 +94,8 @@ Larod::~Larod()
 /// @return
 bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t channels, const char* modelname)
 {
+  _modelWidth = width;
+  _modelHeight = height;
     // Create larod models
     syslog(LOG_INFO, "Create larod models");
     const int larodModelFd = open(filename, O_RDONLY);
@@ -158,6 +157,135 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
         syslog(LOG_ERR, "Unable to open model file %s: %s", filename, strerror(errno));
         return false;
     }
+}
+
+bool Larod::PreProcessModel(size_t streamWidth, size_t streamHeight)
+{
+    // Calculate crop image
+    // 1. The crop area shall fill the input image either horizontally or
+    //    vertically.
+    // 2. The crop area shall have the same aspect ratio as the output image.
+    syslog(LOG_INFO, "Calculate crop image");
+    float destWHratio = (float) _modelWidth / (float) _modelHeight;
+    float cropW = (float) streamWidth;
+    float cropH = cropW / destWHratio;
+    if (cropH > (float) streamHeight) {
+        cropH = (float) streamHeight;
+        cropW = cropH * destWHratio;
+    }
+    unsigned int clipW = (unsigned int)cropW;
+    unsigned int clipH = (unsigned int)cropH;
+    unsigned int clipX = (streamWidth - clipW) / 2;
+    unsigned int clipY = (streamHeight - clipH) / 2;
+    syslog(LOG_INFO, "Crop VDO image X=%d Y=%d (%d x %d)", clipX, clipY, clipW, clipH);
+
+    // Create preprocessing maps
+    syslog(LOG_INFO, "Create preprocessing maps");
+    _ppMap = larodCreateMap(&_error);
+    if (!_ppMap) {
+        syslog(LOG_ERR, "Could not create preprocessing larodMap %s", _error->msg);
+        return false;
+    }
+    if (!larodMapSetStr(_ppMap, "image.input.format", "nv12", &_error)) {
+        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", _error->msg);
+        return false;
+    }
+    if (!larodMapSetIntArr2(_ppMap, "image.input.size", streamWidth, streamHeight, &_error)) {
+        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", _error->msg);
+        return false;
+    }
+    if(_chip != "ambarella-cvflow"){
+        if (!larodMapSetStr(_ppMap, "image.output.format", "rgb-interleaved", &_error)) {
+            syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", _error->msg);
+        return false;
+        }
+    } else {
+        if (!larodMapSetStr(_ppMap, "image.output.format", "rgb-planar", &_error)) {
+            syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", _error->msg);
+        return false;
+        }
+    }
+    if (!larodMapSetIntArr2(_ppMap, "image.output.size", _modelWidth, _modelHeight, &_error)) {
+        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", _error->msg);
+        return false;
+    }
+    _cropMap = larodCreateMap(&_error);
+    if (!_cropMap) {
+        syslog(LOG_ERR, "Could not create preprocessing crop larodMap %s", _error->msg);
+        return false;
+    }
+    if (!larodMapSetIntArr4(_cropMap, "image.input.crop", clipX, clipY, clipW, clipH, &_error)) {
+        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", _error->msg);
+        return false;
+    }
+
+    // Use libyuv as image preprocessing backend
+    const char* larodLibyuvPP = "cpu-proc";
+    const larodDevice* dev_pp = larodGetDevice(_connection, larodLibyuvPP, 0, &_error);
+    _ppModel = larodLoadModel(_connection, -1, dev_pp, LAROD_ACCESS_PRIVATE, "", _ppMap, &_error);
+    if (!_ppModel) {
+            syslog(LOG_ERR, "Unable to load preprocessing model with chip %s: %s", larodLibyuvPP, _error->msg);
+        return false;
+    } else {
+           syslog(LOG_INFO, "Loading preprocessing model with chip %s", larodLibyuvPP);
+    }
+
+    // Create input/output tensors
+    size_t ppNumInputs;
+    size_t ppNumOutputs;
+    syslog(LOG_INFO, "Create input/output tensors");
+    _ppInputTensors = larodCreateModelInputs(_ppModel, &ppNumInputs, &_error);
+    if (!_ppInputTensors) {
+        syslog(LOG_ERR, "Failed retrieving input tensors: %s", _error->msg);
+        return false;
+    }
+    _ppOutputTensors = larodCreateModelOutputs(_ppModel, &ppNumOutputs, &_error);
+    if (!_ppOutputTensors) {
+        syslog(LOG_ERR, "Failed retrieving output tensors: %s", _error->msg);
+        return false;
+    }
+
+    // Determine tensor buffer sizes
+    syslog(LOG_INFO, "Determine tensor buffer sizes");
+    const larodTensorPitches* ppInputPitches = larodGetTensorPitches(_ppInputTensors[0], &_error);
+    if (!ppInputPitches) {
+        syslog(LOG_ERR, "Could not get pitches of tensor: %s", _error->msg);
+        return false;
+    }
+    size_t yuyvBufferSize = ppInputPitches->pitches[0];
+    const larodTensorPitches* outputPitches = larodGetTensorPitches(_outputTensors[0], &_error);
+    if (!outputPitches) {
+        syslog(LOG_ERR, "Could not get pitches of tensor: %s", _error->msg);
+        return false;
+    }
+    //outputBufferSize = outputPitches->pitches[0];
+
+    /*
+    _preProcess = Map(CONV_PP_FILE_PATTERN, yuyvBufferSize);
+    _crop = Map(CROP_FILE_PATTERN, rawWidth * rawHeight * CHANNELS);
+
+    // Connect tensors to file descriptors
+    syslog(LOG_INFO, "Connect tensors to file descriptors");
+    if (!larodSetTensorFd(_ppInputTensors[0], ppInputFd, &_error)) {
+        syslog(LOG_ERR, "Failed setting input tensor fd: %s", _error->msg);
+        return false;
+    }
+    if (!larodSetTensorFd(_ppOutputTensors[0], larodInputFd, &_error)) {
+        syslog(LOG_ERR, "Failed setting input tensor fd: %s", _error->msg);
+        return false;
+    }
+    */
+
+    // Create job requests
+    syslog(LOG_INFO, "Create job requests");
+    _ppRequest = larodCreateJobRequest(_ppModel, _ppInputTensors, ppNumInputs,
+        _ppOutputTensors, ppNumOutputs, _cropMap, &_error);
+    if (!_ppRequest) {
+        syslog(LOG_ERR, "Failed creating preprocessing job request: %s", _error->msg);
+        return false;
+    }
+    return true;
+
 }
 
 /// @brief Do Inference
