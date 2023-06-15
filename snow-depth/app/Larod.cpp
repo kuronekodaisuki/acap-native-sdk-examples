@@ -83,7 +83,7 @@ Larod::~Larod()
   {
     larodDisconnect(&_connection, NULL);
   }
-
+  syslog(LOG_INFO, "Destroy Larod object");
   larodClearError(&_error);
 }
 
