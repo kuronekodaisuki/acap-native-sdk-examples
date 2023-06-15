@@ -12,6 +12,15 @@
 
 #include "Larod.hpp"
 
+// Hardcode to use three image "color" channels (eg. RGB).
+const size_t CHANNELS = 3;
+// Hardcode to set output bytes of four tensors from MobileNet V2 model.
+const size_t FLOATSIZE = 4;
+const size_t TENSOR1SIZE = 80 * FLOATSIZE;
+const size_t TENSOR2SIZE = 20 * FLOATSIZE;
+const size_t TENSOR3SIZE = 20 * FLOATSIZE;
+const size_t TENSOR4SIZE = 1 * FLOATSIZE;
+
 // Name patterns for the temp file we will create.
 char CONV_INP_FILE_PATTERN[] = "/tmp/larod.in.test-XXXXXX";
 char CONV_OUT1_FILE_PATTERN[] = "/tmp/larod.out1.test-XXXXXX";
@@ -65,10 +74,10 @@ Larod::~Larod()
     {
       _inputs.pop_back();
     }
-    //for (size_t i = 0; i < _numOutputs; i++)
-    //{
-    //  _outputs.pop_back();
-    //}
+    for (size_t i = 0; i < _numOutputs; i++)
+    {
+      _outputs.pop_back();
+    }
   }
   if (_connection)
   {
@@ -107,16 +116,28 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
 
           _inputTensors = larodCreateModelInputs(_model, &_numInputs, &_error);
           _outputTensors = larodCreateModelOutputs(_model, &_numOutputs, &_error);
+          syslog(LOG_INFO, "%d inputs, %d outputs", _numInputs, _numOutputs);
+
           _inputs.push_back(Map(width * height * channels, CONV_INP_FILE_PATTERN));
-          for (size_t i = 0; i < _numInputs; i++)
-          {
-            //_inputs.push_back(Map());
-          }
+
           for (size_t i = 0; i < _numOutputs; i++)
           {
-            //_outputs.push_back(Map());
+            switch (i)
+            {
+              case 0:
+                _outputs.push_back(Map(TENSOR1SIZE, CONV_OUT1_FILE_PATTERN));
+                break;
+              case 1:
+                _outputs.push_back(Map(TENSOR2SIZE, CONV_OUT2_FILE_PATTERN));
+                break;
+              case 2:
+                _outputs.push_back(Map(TENSOR3SIZE, CONV_OUT3_FILE_PATTERN));
+                break;
+              case 3:
+                _outputs.push_back(Map(TENSOR4SIZE, CONV_OUT4_FILE_PATTERN));
+                break;
+            }
           }
-          syslog(LOG_INFO, "%d inputs, %d outputs", _numInputs, _numOutputs);
 
           _request = larodCreateJobRequest(_model,
                                           _inputTensors, _numInputs,
