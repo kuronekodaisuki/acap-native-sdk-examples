@@ -86,6 +86,7 @@ int main(int argc, char* argv[])
   syslog(LOG_INFO, "Creating VDO image provider and creating stream %d x %d",
           streamWidth, streamHeight);
 
+  // Setup Larod
   Larod larod(streamWidth, streamHeight);
   larod.LoadModel("model/converted_model.tflite", 300, 300);
 

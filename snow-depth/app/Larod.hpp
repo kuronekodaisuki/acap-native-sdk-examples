@@ -17,6 +17,7 @@ public:
 
 private:
     const char* _chip;
+    size_t _channels;
     size_t _streamWidth;
     size_t _streamHeight;
     size_t _modelWidth;

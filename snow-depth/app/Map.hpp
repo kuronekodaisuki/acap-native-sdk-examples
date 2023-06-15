@@ -5,6 +5,7 @@ class Map
 public:
     Map(size_t size, char* whereToCreate);
     ~Map();
+    int GetHandle() { return _handle;}
 
 private:
     size_t _size = 0;

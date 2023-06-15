@@ -99,6 +99,8 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
 {
   _modelWidth = width;
   _modelHeight = height;
+  _channels = channels;
+
     // Create larod models
     syslog(LOG_INFO, "Create larod models");
     const int larodModelFd = open(filename, O_RDONLY);
@@ -264,20 +266,18 @@ bool Larod::PreProcessModel()
     //outputBufferSize = outputPitches->pitches[0];
 
     _preProcess = new Map(yuyvBufferSize, CONV_PP_FILE_PATTERN);
-    //_crop = new Map(rawWidth * rawHeight * CHANNELS, CROP_FILE_PATTERN);
+    _crop = new Map(_streamWidth * _streamHeight * _channels, CROP_FILE_PATTERN);
 
-/*
     // Connect tensors to file descriptors
     syslog(LOG_INFO, "Connect tensors to file descriptors");
-    if (!larodSetTensorFd(_ppInputTensors[0], ppInputFd, &_error)) {
+    if (!larodSetTensorFd(_ppInputTensors[0], _preProcess->GetHandle(), &_error)) {
         syslog(LOG_ERR, "Failed setting input tensor fd: %s", _error->msg);
         return false;
     }
-    if (!larodSetTensorFd(_ppOutputTensors[0], larodInputFd, &_error)) {
+    if (!larodSetTensorFd(_ppOutputTensors[0], _inputs[0].GetHandle(), &_error)) {
         syslog(LOG_ERR, "Failed setting input tensor fd: %s", _error->msg);
         return false;
     }
-*/
 
     // Create job requests
     syslog(LOG_INFO, "Create job requests");
