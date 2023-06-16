@@ -2,6 +2,7 @@
 #include "larod.h"
 
 #include "Map.hpp"
+#include "Labels.h"
 
 class Larod
 {
@@ -9,12 +10,17 @@ public:
     Larod(size_t streamWidth, size_t streamHeight, const char* chip = "cpu-tflite");
     ~Larod();
 
+    size_t LoadLabels(const char* filename);
+
+    void EnumerateDevices();
+
     bool LoadModel(const char* filename, size_t width, size_t height, size_t channels = 3, const char* modelname = "inference");
 
-    bool PreProcessModel();
+    virtual bool PreProcessModel();
 
-    bool DoInference();
+    virtual bool DoInference();
 
+    virtual bool PostProcess();
 private:
     const char* _chip;
     size_t _channels;
@@ -22,6 +28,8 @@ private:
     size_t _streamHeight;
     size_t _modelWidth;
     size_t _modelHeight;
+    float _threshold = 0.5;
+    Labels _labels;
     const larodDevice* _device;
     const larodJobRequest* _request;
     const larodJobRequest* _ppRequest;

@@ -44,15 +44,7 @@ _streamWidth(streamWidth), _streamHeight(streamHeight), _chip(chip)
       else
       {
         syslog(LOG_ERR, "Can't connect device %s", _error->msg);
-        // List available chip id:s
-        size_t numDevices = 0;
-        syslog(LOG_INFO, "Available chip IDs:");
-        const larodDevice** devices;
-        devices = larodListDevices(_connection, &numDevices, &_error);
-        for (size_t i = 0; i < numDevices; ++i)
-        {
-          syslog(LOG_INFO, "%s: %s", "Chip", larodGetDeviceName(devices[i], &_error));;
-        }
+        EnumerateDevices();
       }
     }
     else
@@ -86,6 +78,25 @@ Larod::~Larod()
   }
   syslog(LOG_INFO, "Destroy Larod object");
   larodClearError(&_error);
+}
+
+/// @brief Enumerate devices
+void Larod::EnumerateDevices()
+{
+  // List available chip id:s
+  size_t numDevices = 0;
+  syslog(LOG_INFO, "Available chip IDs:");
+  const larodDevice** devices;
+  devices = larodListDevices(_connection, &numDevices, &_error);
+  for (size_t i = 0; i < numDevices; ++i)
+  {
+    syslog(LOG_INFO, "%s: %s", "Chip", larodGetDeviceName(devices[i], &_error));;
+  }
+}
+
+size_t Larod::LoadLabels(const char* filename)
+{
+  return _labels.Load(filename);
 }
 
 /// @brief Load model and get Inputs and Outputs Tensors
@@ -164,6 +175,8 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
     }
 }
 
+/// @brief Pre process
+/// @return
 bool Larod::PreProcessModel()
 {
     // Calculate crop image
@@ -306,45 +319,96 @@ bool Larod::DoInference()
   }
 }
 
-
-larodMap* CreatePreProcessMap(unsigned int streamWidth, unsigned int streamHeight, unsigned int inputWidth, unsigned int inputHeight)
+/// @brief Post process
+/// @return
+bool Larod::PostProcess()
 {
-  larodError* error = NULL;
-  larodMap* ppMap = larodCreateMap(&error);
-    if (!ppMap) {
-        syslog(LOG_ERR, "Could not create preprocessing larodMap %s", error->msg);
-        return nullptr;
-    }
-    if (!larodMapSetStr(ppMap, "image.input.format", "nv12", &error)) {
-        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", error->msg);
-        return nullptr;
-    }
-    if (!larodMapSetIntArr2(ppMap, "image.input.size", streamWidth, streamHeight, &error)) {
-        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", error->msg);
-        return nullptr;
-    }
-    if (!larodMapSetStr(ppMap, "image.output.format", "rgb-planar", &error)) {
-        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", error->msg);
-    return nullptr;
-    }
-    if (!larodMapSetIntArr2(ppMap, "image.output.size", inputWidth, inputHeight, &error)) {
-        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", error->msg);
-        return nullptr;
-    }
-    return ppMap;
-}
+  struct timeval startTs, endTs;
+  unsigned int elapsedMs = 0;
 
-larodMap* CreateCropMap(unsigned int clipX, unsigned int clipY, unsigned int clipW, unsigned int clipH)
-{
-  larodError* error = NULL;
-  larodMap* cropMap = larodCreateMap(&error);
-    if (!cropMap) {
-        syslog(LOG_ERR, "Could not create preprocessing crop larodMap %s", error->msg);
-        return nullptr;
-    }
-    if (!larodMapSetIntArr4(cropMap, "image.input.crop", clipX, clipY, clipW, clipH, &error)) {
-        syslog(LOG_ERR, "Failed setting preprocessing parameters: %s", error->msg);
-        return nullptr;
-    }
-    return cropMap;
+  // Since larodOutputAddr points to the beginning of the fd we should
+  // rewind the file position before each job.
+  if (lseek(_outputs[0].GetHandle(), 0, SEEK_SET) == -1) {
+      syslog(LOG_ERR, "Unable to rewind output file position: %s",
+              strerror(errno));
+    return false;
+  }
+
+  if (lseek(_outputs[1].GetHandle(), 0, SEEK_SET) == -1) {
+      syslog(LOG_ERR, "Unable to rewind output file position: %s",
+              strerror(errno));
+    return false;
+  }
+
+  if (lseek(_outputs[2].GetHandle(), 0, SEEK_SET) == -1) {
+      syslog(LOG_ERR, "Unable to rewind output file position: %s",
+              strerror(errno));
+    return false;
+  }
+
+  if (lseek(_outputs[3].GetHandle(), 0, SEEK_SET) == -1) {
+      syslog(LOG_ERR, "Unable to rewind output file position: %s",
+              strerror(errno));
+    return false;
+  }
+
+  gettimeofday(&startTs, NULL);
+  if (!larodRunJob(_connection, _request, &_error)) {
+      syslog(LOG_ERR, "Unable to run inference on model %s (%d)",
+              _error->msg, _error->code);
+    return false;
+  }
+  gettimeofday(&endTs, NULL);
+
+  elapsedMs = (unsigned int) (((endTs.tv_sec - startTs.tv_sec) * 1000) +
+                              ((endTs.tv_usec - startTs.tv_usec) / 1000));
+  syslog(LOG_INFO, "Ran inference for %u ms", elapsedMs);
+
+  float* locations = (float*) _outputs[0].GetPtr();
+  float* classes = (float*) _outputs[1].GetPtr();
+  float* scores = (float*) _outputs[2].GetPtr();
+  float* numberofdetections = (float*) _outputs[3].GetPtr();
+
+  if ((int) numberofdetections[0] == 0)
+  {
+      syslog(LOG_INFO,"No object is detected");
+  }
+  else
+  {
+      for (int i = 0; i < numberofdetections[0]; i++)
+      {
+          float top = locations[4*i];
+          float left = locations[4*i+1];
+          float bottom = locations[4*i+2];
+          float right = locations[4*i+3];
+
+          unsigned int crop_x = left * _streamWidth;
+          unsigned int crop_y = top * _streamHeight;
+          unsigned int crop_w = (right - left) * _streamWidth;
+          unsigned int crop_h = (bottom - top) * _streamHeight;
+
+          if (scores[i] >= _threshold)
+          {
+              syslog(LOG_INFO, "Object %d: Classes: %s - Scores: %f - Locations: [%f,%f,%f,%f]",
+                  i, _labels[(int) classes[i]], scores[i], top, left, bottom, right);
+/*
+              unsigned char* crop_buffer = crop_interleaved(cropAddr, rawWidth, rawHeight, CHANNELS,
+                                                            crop_x, crop_y, crop_w, crop_h);
+
+              unsigned long jpeg_size = 0;
+              unsigned char* jpeg_buffer = NULL;
+              struct jpeg_compress_struct jpeg_conf;
+              set_jpeg_configuration(crop_w, crop_h, CHANNELS, args.quality, &jpeg_conf);
+              buffer_to_jpeg(crop_buffer, &jpeg_conf, &jpeg_size, &jpeg_buffer);
+              char file_name[32];
+              snprintf(file_name, sizeof(char) * 32, "/tmp/detection_%i.jpg", i);
+              jpeg_to_file(file_name, jpeg_buffer, jpeg_size);
+              free(crop_buffer);
+              free(jpeg_buffer);
+*/
+          }
+      }
+  }
+
+  return true;
 }

@@ -88,6 +88,8 @@ int main(int argc, char* argv[])
 
   // Setup Larod
   Larod larod(streamWidth, streamHeight);
+  larod.EnumerateDevices();
+
   larod.LoadModel("model/converted_model.tflite", 300, 300);
 
 

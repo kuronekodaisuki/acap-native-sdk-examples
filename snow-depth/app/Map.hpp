@@ -6,6 +6,7 @@ public:
     Map(size_t size, char* whereToCreate);
     ~Map();
     int GetHandle() { return _handle;}
+    void* GetPtr() {return _mappedAddr;}
 
 private:
     size_t _size = 0;
