@@ -208,25 +208,25 @@ bool Larod::DoInference(VdoBuffer* buf)
     struct timeval startTs, endTs;
     unsigned int elapsedMs = 0;
 
-        // Get data from latest frame.
-        uint8_t* nv12Data = (uint8_t*) vdo_buffer_get_data(buf);
+    // Get data from latest frame.
+    uint8_t* nv12Data = (uint8_t*) vdo_buffer_get_data(buf);
 
-        // Covert image data from NV12 format to interleaved uint8_t RGB format.
-        gettimeofday(&startTs, NULL);
+    // Covert image data from NV12 format to interleaved uint8_t RGB format.
+    gettimeofday(&startTs, NULL);
 
-        // Convert YUV to RGB
-        memcpy(_preProcess->GetPtr(), nv12Data, _yuyvBufferSize);
-        if (!larodRunJob(_connection, _ppRequest, &_error)) {
-            syslog(LOG_ERR, "Unable to run job to preprocess model: %s (%d)",
-                   _error->msg, _error->code);
-            return false;
-        }
+    // Convert YUV to RGB
+    memcpy(_preProcess->GetPtr(), nv12Data, _yuyvBufferSize);
+    if (!larodRunJob(_connection, _ppRequest, &_error)) {
+        syslog(LOG_ERR, "Unable to run job to preprocess model: %s (%d)",
+                _error->msg, _error->code);
+        return false;
+    }
 
-        gettimeofday(&endTs, NULL);
+    gettimeofday(&endTs, NULL);
 
-        elapsedMs = (unsigned int) (((endTs.tv_sec - startTs.tv_sec) * 1000) +
-                                    ((endTs.tv_usec - startTs.tv_usec) / 1000));
-        syslog(LOG_INFO, "Converted image in %u ms", elapsedMs);
+    elapsedMs = (unsigned int) (((endTs.tv_sec - startTs.tv_sec) * 1000) +
+                                ((endTs.tv_usec - startTs.tv_usec) / 1000));
+    syslog(LOG_INFO, "Converted image in %u ms", elapsedMs);
 
     // Since larodOutputAddr points to the beginning of the fd we should
     // rewind the file position before each job.
