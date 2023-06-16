@@ -231,25 +231,25 @@ bool Larod::DoInference(VdoBuffer* buf)
     // Since larodOutputAddr points to the beginning of the fd we should
     // rewind the file position before each job.
     if (lseek(_outputs[0].GetHandle(), 0, SEEK_SET) == -1) {
-        syslog(LOG_ERR, "Unable to rewind output file position: %s",
-                strerror(errno));
+        syslog(LOG_ERR, "Unable to rewind output 1 file position: %s %d",
+                strerror(errno), _outputs[0].GetHandle());
       return false;
     }
 
     if (lseek(_outputs[1].GetHandle(), 0, SEEK_SET) == -1) {
-        syslog(LOG_ERR, "Unable to rewind output file position: %s",
+        syslog(LOG_ERR, "Unable to rewind output 2 file position: %s",
                 strerror(errno));
       return false;
     }
 
     if (lseek(_outputs[2].GetHandle(), 0, SEEK_SET) == -1) {
-        syslog(LOG_ERR, "Unable to rewind output file position: %s",
+        syslog(LOG_ERR, "Unable to rewind output 3 file position: %s",
                 strerror(errno));
       return false;
     }
 
     if (lseek(_outputs[3].GetHandle(), 0, SEEK_SET) == -1) {
-        syslog(LOG_ERR, "Unable to rewind output file position: %s",
+        syslog(LOG_ERR, "Unable to rewind output 4 file position: %s",
                 strerror(errno));
       return false;
     }
