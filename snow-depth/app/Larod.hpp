@@ -7,20 +7,40 @@
 class Larod
 {
 public:
-    Larod(size_t streamWidth, size_t streamHeight, const char* chip = "cpu-tflite");
+    /// @brief Constructor
+    /// @param streamWidth
+    /// @param streamHeight
+    /// @param device cpu-tflite | google-edge-tpu-tflite | axis-a7-gpu-tflite
+    Larod(size_t streamWidth, size_t streamHeight, const char* device = "cpu-tflite");
+
+    /// @brief Destructor
     ~Larod();
 
+    /// @brief Load labels
+    /// @param filename
+    /// @return
     size_t LoadLabels(const char* filename);
 
+    /// @brief Enumerate device
     void EnumerateDevices();
 
+    /// @brief Load inference model
+    /// @param filename
+    /// @param width
+    /// @param height
+    /// @param channels
+    /// @param modelname
+    /// @return
     bool LoadModel(const char* filename, size_t width, size_t height, size_t channels = 3, const char* modelname = "inference");
 
-    virtual bool PreProcessModel();
-
+    /// @brief Do inference
+    /// @return
     virtual bool DoInference();
 
+protected:
+    virtual bool PreProcessModel();
     virtual bool PostProcess();
+
 private:
     const char* _chip;
     size_t _channels;

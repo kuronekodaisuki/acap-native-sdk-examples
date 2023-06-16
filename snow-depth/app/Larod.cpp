@@ -38,9 +38,9 @@ _streamWidth(streamWidth), _streamHeight(streamHeight), _chip(chip)
     // Set up larod connection.
     if (larodConnect(&_connection, &_error))
     {
-      _device = larodGetDevice(_connection, chip, 0, &_error);
+      _device = larodGetDevice(_connection, _chip, 0, &_error);
       if (_device)
-        syslog(LOG_INFO, "%s device connected", chip);
+        syslog(LOG_INFO, "%s device connected", _chip);
       else
       {
         syslog(LOG_ERR, "Can't connect device %s", _error->msg);
@@ -175,6 +175,21 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
     }
 }
 
+/// @brief Do Inference
+/// @return
+bool Larod::DoInference()
+{
+  if (_connection && _request)
+  {
+    return larodRunJob(_connection, _request, &_error);
+  }
+  else
+  {
+    syslog(LOG_ERR, "Failed to Inference");
+    return false;
+  }
+}
+
 /// @brief Pre process
 /// @return
 bool Larod::PreProcessModel()
@@ -302,21 +317,6 @@ bool Larod::PreProcessModel()
     }
     return true;
 
-}
-
-/// @brief Do Inference
-/// @return
-bool Larod::DoInference()
-{
-  if (_connection && _request)
-  {
-    return larodRunJob(_connection, _request, &_error);
-  }
-  else
-  {
-    syslog(LOG_ERR, "Failed to Inference");
-    return false;
-  }
 }
 
 /// @brief Post process
