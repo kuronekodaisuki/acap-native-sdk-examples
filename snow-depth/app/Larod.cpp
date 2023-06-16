@@ -133,6 +133,7 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
           _outputTensors = larodCreateModelOutputs(_model, &_numOutputs, &_error);
           syslog(LOG_INFO, "%d inputs, %d outputs", _numInputs, _numOutputs);
 
+          // Prepare input and output buffer
           _inputs.push_back(Map(width * height * channels, CONV_INP_FILE_PATTERN));
 
           for (size_t i = 0; i < _numOutputs; i++)
@@ -154,18 +155,12 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
             }
           }
 
-          _request = larodCreateJobRequest(_model,
+          // Create Request of inference
+          _InferRequest = larodCreateJobRequest(_model,
                                           _inputTensors, _numInputs,
                                           _outputTensors, _numOutputs,
                                           NULL, &_error);
-          if (_request)
-          {
-            for (size_t i = 0; i < _numInputs; i++)
-            {
-              //createAndMapTmpFile(CONV_INP_FILE_PATTERN, width * height * channels, )
-            }
-          }
-          return true;
+          return CreatePreProcessModel();
         }
     }
     else
@@ -177,22 +172,80 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
 
 /// @brief Do Inference
 /// @return
-bool Larod::DoInference()
+bool Larod::DoInference(VdoBuffer* buf)
 {
-  if (_connection && _request)
+  if (_connection && _InferRequest)
   {
-    return larodRunJob(_connection, _request, &_error);
+    struct timeval startTs, endTs;
+    unsigned int elapsedMs = 0;
+
+        // Get data from latest frame.
+        uint8_t* nv12Data = (uint8_t*) vdo_buffer_get_data(buf);
+
+        // Covert image data from NV12 format to interleaved uint8_t RGB format.
+        gettimeofday(&startTs, NULL);
+
+        // Convert YUV to RGB
+        memcpy(_preProcess->GetPtr(), nv12Data, _yuyvBufferSize);
+        if (!larodRunJob(_connection, _ppRequest, &_error)) {
+            syslog(LOG_ERR, "Unable to run job to preprocess model: %s (%d)",
+                   _error->msg, _error->code);
+            return false;
+        }
+
+        gettimeofday(&endTs, NULL);
+
+        elapsedMs = (unsigned int) (((endTs.tv_sec - startTs.tv_sec) * 1000) +
+                                    ((endTs.tv_usec - startTs.tv_usec) / 1000));
+        syslog(LOG_INFO, "Converted image in %u ms", elapsedMs);
+
+    // Since larodOutputAddr points to the beginning of the fd we should
+    // rewind the file position before each job.
+    if (lseek(_outputs[0].GetHandle(), 0, SEEK_SET) == -1) {
+        syslog(LOG_ERR, "Unable to rewind output file position: %s",
+                strerror(errno));
+      return false;
+    }
+
+    if (lseek(_outputs[1].GetHandle(), 0, SEEK_SET) == -1) {
+        syslog(LOG_ERR, "Unable to rewind output file position: %s",
+                strerror(errno));
+      return false;
+    }
+
+    if (lseek(_outputs[2].GetHandle(), 0, SEEK_SET) == -1) {
+        syslog(LOG_ERR, "Unable to rewind output file position: %s",
+                strerror(errno));
+      return false;
+    }
+
+    if (lseek(_outputs[3].GetHandle(), 0, SEEK_SET) == -1) {
+        syslog(LOG_ERR, "Unable to rewind output file position: %s",
+                strerror(errno));
+      return false;
+    }
+
+    gettimeofday(&startTs, NULL);
+    if (!larodRunJob(_connection, _InferRequest, &_error)) {
+        syslog(LOG_ERR, "Unable to run inference on model %s (%d)",
+                _error->msg, _error->code);
+      return false;
+    }
+    gettimeofday(&endTs, NULL);
+
+    elapsedMs = (unsigned int) (((endTs.tv_sec - startTs.tv_sec) * 1000) +
+                                ((endTs.tv_usec - startTs.tv_usec) / 1000));
+    syslog(LOG_INFO, "Ran inference for %u ms", elapsedMs);
+
+    return PostProcess();
   }
-  else
-  {
-    syslog(LOG_ERR, "Failed to Inference");
-    return false;
-  }
+  syslog(LOG_ERR, "Failed to Inference");
+  return false;
 }
 
-/// @brief Pre process
+/// @brief Create pre process model
 /// @return
-bool Larod::PreProcessModel()
+bool Larod::CreatePreProcessModel()
 {
     // Calculate crop image
     // 1. The crop area shall fill the input image either horizontally or
@@ -285,7 +338,7 @@ bool Larod::PreProcessModel()
         syslog(LOG_ERR, "Could not get pitches of tensor: %s", _error->msg);
         return false;
     }
-    size_t yuyvBufferSize = ppInputPitches->pitches[0];
+    _yuyvBufferSize = ppInputPitches->pitches[0];
     const larodTensorPitches* outputPitches = larodGetTensorPitches(_outputTensors[0], &_error);
     if (!outputPitches) {
         syslog(LOG_ERR, "Could not get pitches of tensor: %s", _error->msg);
@@ -293,7 +346,7 @@ bool Larod::PreProcessModel()
     }
     //outputBufferSize = outputPitches->pitches[0];
 
-    _preProcess = new Map(yuyvBufferSize, CONV_PP_FILE_PATTERN);
+    _preProcess = new Map(_yuyvBufferSize, CONV_PP_FILE_PATTERN);
     _crop = new Map(_streamWidth * _streamHeight * _channels, CROP_FILE_PATTERN);
 
     // Connect tensors to file descriptors
@@ -316,54 +369,12 @@ bool Larod::PreProcessModel()
         return false;
     }
     return true;
-
 }
 
 /// @brief Post process
 /// @return
 bool Larod::PostProcess()
 {
-  struct timeval startTs, endTs;
-  unsigned int elapsedMs = 0;
-
-  // Since larodOutputAddr points to the beginning of the fd we should
-  // rewind the file position before each job.
-  if (lseek(_outputs[0].GetHandle(), 0, SEEK_SET) == -1) {
-      syslog(LOG_ERR, "Unable to rewind output file position: %s",
-              strerror(errno));
-    return false;
-  }
-
-  if (lseek(_outputs[1].GetHandle(), 0, SEEK_SET) == -1) {
-      syslog(LOG_ERR, "Unable to rewind output file position: %s",
-              strerror(errno));
-    return false;
-  }
-
-  if (lseek(_outputs[2].GetHandle(), 0, SEEK_SET) == -1) {
-      syslog(LOG_ERR, "Unable to rewind output file position: %s",
-              strerror(errno));
-    return false;
-  }
-
-  if (lseek(_outputs[3].GetHandle(), 0, SEEK_SET) == -1) {
-      syslog(LOG_ERR, "Unable to rewind output file position: %s",
-              strerror(errno));
-    return false;
-  }
-
-  gettimeofday(&startTs, NULL);
-  if (!larodRunJob(_connection, _request, &_error)) {
-      syslog(LOG_ERR, "Unable to run inference on model %s (%d)",
-              _error->msg, _error->code);
-    return false;
-  }
-  gettimeofday(&endTs, NULL);
-
-  elapsedMs = (unsigned int) (((endTs.tv_sec - startTs.tv_sec) * 1000) +
-                              ((endTs.tv_usec - startTs.tv_usec) / 1000));
-  syslog(LOG_INFO, "Ran inference for %u ms", elapsedMs);
-
   float* locations = (float*) _outputs[0].GetPtr();
   float* classes = (float*) _outputs[1].GetPtr();
   float* scores = (float*) _outputs[2].GetPtr();

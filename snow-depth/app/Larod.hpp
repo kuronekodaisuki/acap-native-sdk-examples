@@ -1,5 +1,6 @@
 #include <vector>
 #include "larod.h"
+#include "vdo-stream.h"
 
 #include "Map.hpp"
 #include "Labels.h"
@@ -35,10 +36,10 @@ public:
 
     /// @brief Do inference
     /// @return
-    virtual bool DoInference();
+    virtual bool DoInference(VdoBuffer* yuvData);
 
 protected:
-    virtual bool PreProcessModel();
+    virtual bool CreatePreProcessModel();
     virtual bool PostProcess();
 
 private:
@@ -48,10 +49,11 @@ private:
     size_t _streamHeight;
     size_t _modelWidth;
     size_t _modelHeight;
+    size_t _yuyvBufferSize;
     float _threshold = 0.5;
     Labels _labels;
     const larodDevice* _device;
-    const larodJobRequest* _request;
+    const larodJobRequest* _InferRequest;
     const larodJobRequest* _ppRequest;
     larodConnection* _connection;
     larodMap* _ppMap;
