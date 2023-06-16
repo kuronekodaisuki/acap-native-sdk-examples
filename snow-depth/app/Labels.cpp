@@ -69,42 +69,8 @@ size_t Labels::Load(const char* filename)
         return 0;
     }
 
-    /*
-    size_t numBytesRead = -1;
-    size_t totalBytesRead = 0;
-    char* fileReadPtr = labelsData;
-    while (totalBytesRead < labelsFileSize)
-    {
-        numBytesRead = read(labelsFd, fileReadPtr, labelsFileSize - totalBytesRead);
-
-        if (numBytesRead < 1) {
-            syslog(LOG_ERR, "%s: Failed reading from labels file: %s", __func__,
-                strerror(errno));
-            goto end;
-        }
-        totalBytesRead += (size_t)numBytesRead;
-        fileReadPtr += numBytesRead;
-    }
-    */
     ssize_t readed = read(labelsFd, labelsData, labelsFileSize);
     close(labelsFd);
-
-    /*
-    // Now count number of lines in the file - check all bytes except the last
-    // one in the file.
-    size_t numLines = 0;
-    for (size_t i = 0; i < (labelsFileSize - 1); i++)
-    {
-        if (labelsData[i] == '\n') {
-            numLines++;
-        }
-    }
-
-    // We assume that there is always a line at the end of the file, possibly
-    // terminated by newline char. Either way add this line as well to the
-    // counter.
-    numLines++;
-    */
 
     //size_t labelIdx = 0;
     //labelArray[labelIdx] = labelsData;
@@ -127,33 +93,8 @@ size_t Labels::Load(const char* filename)
         }
     }
 
-    /*
-    // If the very last byte in the labels file was a new-line we just
-    // replace that with a NULL-char. Refer previous for loop skipping looking
-    // for new-line at the end of file.
-    if (labelsData[labelsFileSize - 1] == '\n') {
-        labelsData[labelsFileSize - 1] = '\0';
-    }
-
-    // Make sure we always have a terminating NULL char after the label file
-    // contents.
-    labelsData[labelsFileSize] = '\0';
-
-    // Now go through the list of strings and cap if strings too long.
-    for (size_t i = 0; i < numLines; i++)
-    {
-        size_t stringLen = strnlen(labelArray[i], LINE_MAX_LEN);
-        if (stringLen >= LINE_MAX_LEN) {
-            // Just insert capping NULL terminator to limit the string len.
-            *(labelArray[i] + LINE_MAX_LEN + 1) = '\0';
-        }
-    }
-
-    *labelsPtr = labelArray;
-    *numLabelsPtr = numLines;
-    *labelFileBuffer = labelsData;
-    */
-
     delete[] labelsData;
+
+    syslog(LOG_INFO, "Read %d labels from %s", _labels.size(), filename);
     return _labels.size();
 }

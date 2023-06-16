@@ -244,9 +244,9 @@ bool SnowDetector::LoadCameraParameters(const char* filepath)
             parameters["distortion"] >> _distCoeffs;
 
             for (int i = 0; i < 9; i++)
-              syslog(LOG_INFO, "intrinsic[%d]:%f", i, _cameraMatrix.at<double>(i));
+              syslog(LOG_DEBUG, "intrinsic[%d]:%f", i, _cameraMatrix.at<double>(i));
             for (int i = 0; i < 5; i++)
-              syslog(LOG_INFO, "distortion[%d]:%f", i, _distCoeffs.at<double>(i));
+              syslog(LOG_DEBUG, "distortion[%d]:%f", i, _distCoeffs.at<double>(i));
             return true;
         }
     }
