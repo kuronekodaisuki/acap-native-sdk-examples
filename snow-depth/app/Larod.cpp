@@ -135,6 +135,14 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
 
           // Prepare input and output buffer
           _inputs.push_back(Map(width * height * channels, CONV_INP_FILE_PATTERN));
+          syslog(LOG_INFO, "Set input tensors");
+          if (!larodSetTensorFd(_inputTensors[0], _inputs[0].GetHandle(), &_error)) {
+            syslog(LOG_ERR, "Failed setting input tensor fd: %s", _error->msg);
+            return false;
+          }
+
+          // Pre process to inputs
+          CreatePreProcessModel();
 
           for (size_t i = 0; i < _numOutputs; i++)
           {
@@ -142,15 +150,31 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
             {
               case 0:
                 _outputs.push_back(Map(TENSOR1SIZE, CONV_OUT1_FILE_PATTERN));
+                syslog(LOG_INFO, "Set output tensors");
+                if (!larodSetTensorFd(_outputTensors[0], _outputs[0].GetHandle(), &_error)) {
+                    syslog(LOG_ERR, "Failed setting output tensor fd: %s", _error->msg);
+                    return false;
+                }
                 break;
               case 1:
                 _outputs.push_back(Map(TENSOR2SIZE, CONV_OUT2_FILE_PATTERN));
+                if (!larodSetTensorFd(_outputTensors[1], _outputs[1].GetHandle(), &_error)) {
+                    syslog(LOG_ERR, "Failed setting output tensor fd: %s", _error->msg);
+                    return false;
+                }
                 break;
               case 2:
                 _outputs.push_back(Map(TENSOR3SIZE, CONV_OUT3_FILE_PATTERN));
-                break;
+                if (!larodSetTensorFd(_outputTensors[2], _outputs[2].GetHandle(), &_error)) {
+                    syslog(LOG_ERR, "Failed setting output tensor fd: %s", _error->msg);
+                    return false;
+                }                break;
               case 3:
                 _outputs.push_back(Map(TENSOR4SIZE, CONV_OUT4_FILE_PATTERN));
+                if (!larodSetTensorFd(_outputTensors[3], _outputs[3].GetHandle(), &_error)) {
+                    syslog(LOG_ERR, "Failed setting output tensor fd: %s", _error->msg);
+                    return false;
+                }
                 break;
             }
           }
@@ -160,7 +184,12 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
                                           _inputTensors, _numInputs,
                                           _outputTensors, _numOutputs,
                                           NULL, &_error);
-          return CreatePreProcessModel();
+          if (!_InferRequest)
+          {
+            syslog(LOG_ERR, "%s: Failed to create inference request %s", __func__, _error->msg);
+            return false;
+          }
+          return true;
         }
     }
     else

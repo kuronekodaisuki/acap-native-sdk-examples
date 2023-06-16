@@ -42,7 +42,6 @@ protected:
     virtual bool CreatePreProcessModel();
     virtual bool PostProcess();
 
-private:
     const char* _chip;
     size_t _channels;
     size_t _streamWidth;

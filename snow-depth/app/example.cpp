@@ -138,6 +138,7 @@ int main(int argc, char* argv[])
     float depth = detector.Detect(bgr_mat);
     syslog(LOG_INFO, "'%d': %f", detector.GetStatus(), depth);
 
+    larod.DoInference(buf);
 
     aruco::detectMarkers(bgr_mat, dictionary, markerCorners, markerIds);
     aruco::drawDetectedMarkers(bgr_mat, markerCorners);
