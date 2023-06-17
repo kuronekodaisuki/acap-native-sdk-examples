@@ -16,7 +16,7 @@
 const size_t CHANNELS = 3;
 // Hardcode to set output bytes of four tensors from MobileNet V2 model.
 const size_t FLOATSIZE = 4;
-const size_t TENSOR1SIZE = 80 * FLOATSIZE;
+const size_t TENSOR1SIZE = 301665 * FLOATSIZE;
 const size_t TENSOR2SIZE = 20 * FLOATSIZE;
 const size_t TENSOR3SIZE = 20 * FLOATSIZE;
 const size_t TENSOR4SIZE = 1 * FLOATSIZE;

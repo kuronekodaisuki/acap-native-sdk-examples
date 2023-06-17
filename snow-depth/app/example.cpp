@@ -26,7 +26,7 @@
 #include <glib.h>
 #include <axoverlay.h>
 
-#include "Larod.hpp"
+#include "YOLOX.hpp"
 
 #include "SnowMeasurement/SnowMeasurement.h"
 #include "imgprovider.h"
@@ -87,11 +87,12 @@ int main(int argc, char* argv[])
           streamWidth, streamHeight);
 
   // Setup Larod
-  Larod larod(streamWidth, streamHeight);
-  larod.EnumerateDevices();
+  YOLOX yolox(streamWidth, streamHeight);
+  yolox.EnumerateDevices();
 
-  larod.LoadModel("model/yolox_nano_int8_quantize.tflite", 416, 416);
-  larod.LoadLabels("label/labels.txt");
+  // Load YOLOX_nano model
+  yolox.LoadModel("model/yolox_nano_int8_quantize.tflite", 416, 416);
+  yolox.LoadLabels("label/labels.txt");
 
   provider = createImgProvider(streamWidth, streamHeight, 2, VDO_FORMAT_YUV);
   if (!provider) {
@@ -138,7 +139,7 @@ int main(int argc, char* argv[])
     float depth = detector.Detect(bgr_mat);
     syslog(LOG_INFO, "'%d': %f", detector.GetStatus(), depth);
 
-    larod.DoInference(buf);
+    yolox.DoInference(buf);
 
     aruco::detectMarkers(bgr_mat, dictionary, markerCorners, markerIds);
     aruco::drawDetectedMarkers(bgr_mat, markerCorners);

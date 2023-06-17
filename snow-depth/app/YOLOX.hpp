@@ -72,6 +72,11 @@ public:
     /// @brief Destructor
     ~YOLOX();
 
+    /// @brief Do inference
+    /// @param yuvData
+    /// @return
+    bool DoInference(VdoBuffer* yuvData);
+
     /// @brief Post process
     /// @param width
     /// @param height

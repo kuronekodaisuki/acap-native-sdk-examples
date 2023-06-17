@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <math.h>
+#include <sys/time.h>
+
 #include "YOLOX.hpp"
 
 YOLOX::YOLOX(size_t streamWidth, size_t streamHeight, const char* device):
@@ -11,6 +13,51 @@ Larod(streamWidth, streamHeight, device)
 YOLOX::~YOLOX()
 {
 
+}
+
+bool YOLOX::DoInference(VdoBuffer* buf)
+{
+  if (_connection && _InferRequest)
+  {
+    struct timeval startTs, endTs;
+    unsigned int elapsedMs = 0;
+
+    // Get data from latest frame.
+    uint8_t* nv12Data = (uint8_t*) vdo_buffer_get_data(buf);
+
+    // Covert image data from NV12 format to interleaved uint8_t RGB format.
+    gettimeofday(&startTs, NULL);
+
+    // Convert YUV to RGB
+    memcpy(_preProcess->GetPtr(), nv12Data, _yuyvBufferSize);
+    if (!larodRunJob(_connection, _ppRequest, &_error)) {
+        syslog(LOG_ERR, "Unable to run job to preprocess model: %s (%d)",
+                _error->msg, _error->code);
+        return false;
+    }
+
+    gettimeofday(&endTs, NULL);
+
+    elapsedMs = (unsigned int) (((endTs.tv_sec - startTs.tv_sec) * 1000) +
+                                ((endTs.tv_usec - startTs.tv_usec) / 1000));
+    syslog(LOG_INFO, "Converted image in %u ms", elapsedMs);
+
+    gettimeofday(&startTs, NULL);
+    if (!larodRunJob(_connection, _InferRequest, &_error)) {
+        syslog(LOG_ERR, "Unable to run inference on model %s (%d)",
+                _error->msg, _error->code);
+      return false;
+    }
+    gettimeofday(&endTs, NULL);
+
+    elapsedMs = (unsigned int) (((endTs.tv_sec - startTs.tv_sec) * 1000) +
+                                ((endTs.tv_usec - startTs.tv_usec) / 1000));
+    syslog(LOG_INFO, "Ran inference for %u ms", elapsedMs);
+
+    return PostProcess();
+  }
+  syslog(LOG_ERR, "Failed to Inference");
+  return false;
 }
 
 bool YOLOX::PostProcess()
