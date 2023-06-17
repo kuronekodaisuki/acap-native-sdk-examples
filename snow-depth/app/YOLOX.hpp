@@ -16,7 +16,48 @@ public:
     {
         return prob > right.prob;
     }
-    float Intersection(const Object& right) {return 0;}
+
+    inline float Right() const {return x + width;}
+    inline float Bottom() const {return y + height;}
+
+    /// @brief Area of intersection
+    /// @param right
+    /// @return
+    float IntersectionArea(const Object& obj) const
+    {
+        float left, top;
+        float right = std::min(Right(), obj.Right());
+        float bottom = std::min(Bottom(), obj.Bottom());
+        if (x <= obj.x && obj.x < Right())
+        {
+            left = obj.x;
+            if (y <= obj.y && obj.y < Bottom())
+            {
+                top = obj.y;
+                return (right - left) * (bottom - top);
+            }
+            else if (obj.y <= y && y < obj.Bottom())
+            {
+                top = y;
+                return (right - left) * (bottom - top);
+            }
+        }
+        else if (obj.x <= x && x <= obj.Right())
+        {
+            left = x;
+            if (y <= obj.y && obj.y < Bottom())
+            {
+                top = obj.y;
+                return (right - left) * (bottom - top);
+            }
+            else if (obj.y <= y && y < obj.Bottom())
+            {
+                top = y;
+                return (right - left) * (bottom - top);
+            }
+        }
+        return 0;
+    }
 };
 
 class YOLOX: public Larod
@@ -38,6 +79,7 @@ public:
     /// @param scaleY
     void postProcess(const int width, const int height, float scaleX, float scaleY);
 
+private:
     struct GridAndStride
     {
         int grid0;
@@ -46,8 +88,6 @@ public:
 
         GridAndStride(int g0, int g1, int s): grid0(g0), grid1(g1), stride(s) {}
     };
-
-private:
     float* _output;
     float _nms_threshold = NMS_THRESHOLD;
     float _bbox_confidential_threshold = BBOX_CONF_THRESHOLD;

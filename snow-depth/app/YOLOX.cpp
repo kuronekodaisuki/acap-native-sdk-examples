@@ -85,8 +85,6 @@ void YOLOX::generate_yolox_proposals(float prob_threshold)
         float x0 = x_center - w / 2;
         float y0 = y_center - h / 2;
 
-        //cv::Rect_<float> bound(x0, y0, w, h);
-
         for (size_t class_idx = 0; class_idx < _numClasses; class_idx++)
         {
             float box_cls_score = _output[offset + 5 + class_idx];
@@ -94,7 +92,10 @@ void YOLOX::generate_yolox_proposals(float prob_threshold)
             if (prob_threshold < box_prob)
             {
                 Object obj;
-                //obj.rect = bound;
+                obj.x = x0;
+                obj.y = y0;
+                obj.width = w;
+                obj.height = h;
                 obj.label = (int)class_idx;
                 obj.prob = box_prob;
 
@@ -128,7 +129,7 @@ void YOLOX::nms_sorted_bboxes(const std::vector<Object>& objects, std::vector<in
             const Object& b = objects[picked[j]];
 
             // intersection over union
-            float inter_area = a.Intersection(b);
+            float inter_area = a.IntersectionArea(b);
             float union_area = areas[i] + areas[picked[j]] - inter_area;
             // float IoU = inter_area / union_area
             if (nms_threshold < inter_area / union_area)
