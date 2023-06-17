@@ -19,15 +19,6 @@ public:
     float Intersection(const Object& right) {return 0;}
 };
 
-struct GridAndStride
-{
-    int grid0;
-    int grid1;
-    int stride;
-
-    GridAndStride(int g0, int g1, int s): grid0(g0), grid1(g1), stride(s) {}
-};
-
 class YOLOX: public Larod
 {
 public:
@@ -47,7 +38,17 @@ public:
     /// @param scaleY
     void postProcess(const int width, const int height, float scaleX, float scaleY);
 
+    struct GridAndStride
+    {
+        int grid0;
+        int grid1;
+        int stride;
+
+        GridAndStride(int g0, int g1, int s): grid0(g0), grid1(g1), stride(s) {}
+    };
+
 private:
+    float* _output;
     float _nms_threshold = NMS_THRESHOLD;
     float _bbox_confidential_threshold = BBOX_CONF_THRESHOLD;
     size_t _numClasses;

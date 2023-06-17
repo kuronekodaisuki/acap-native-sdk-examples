@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <math.h>
 #include "YOLOX.hpp"
 
@@ -14,6 +15,7 @@ YOLOX::~YOLOX()
 
 void YOLOX::postProcess(const int width, const int height, float scaleX, float scaleY)
 {
+    _output = (float*)_outputs[0].GetPtr();
     _proposals.clear();
     generate_yolox_proposals(_bbox_confidential_threshold);
 
@@ -39,7 +41,7 @@ void YOLOX::postProcess(const int width, const int height, float scaleX, float s
     }
 }
 
-std::vector<GridAndStride> YOLOX::generate_grids_and_strides()
+std::vector<YOLOX::GridAndStride> YOLOX::generate_grids_and_strides()
 {
     std::vector<int> strides = { 8, 16, 32 };
 
