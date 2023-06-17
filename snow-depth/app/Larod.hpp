@@ -32,7 +32,7 @@ public:
     /// @param channels
     /// @param modelname
     /// @return
-    bool LoadModel(const char* filename, size_t width, size_t height, size_t channels = 3, const char* modelname = "inference");
+    virtual bool LoadModel(const char* filename, size_t width, size_t height, size_t channels = 3, const char* modelname = "inference");
 
     /// @brief Do inference
     /// @return

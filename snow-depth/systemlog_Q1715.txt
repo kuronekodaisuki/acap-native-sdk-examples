@@ -1,60 +1,59 @@
 ----- Contents of SYSTEM_LOG for 'snow_depth' -----
 
 
-2023-06-16T20:11:59.735+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Running OpenCV example with VDO as video source
-2023-06-16T20:11:59.755+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: /usr/local/packages/snow_depth/config/AXIS_Q6215-LE.xml loaded
-2023-06-16T20:12:00.149+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Creating VDO image provider and creating stream 1024 x 576
-2023-06-16T20:12:00.149+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: chooseStreamResolution: We select stream w/h=1024 x 576 based on VDO channel info.
-2023-06-16T20:12:00.510+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Available chip IDs:
-2023-06-16T20:12:00.510+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Chip: axis-a7-gpu-proc
-2023-06-16T20:12:00.510+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Chip: axis-a7-gpu-tflite
-2023-06-16T20:12:00.510+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Chip: axis-ace-proc
-2023-06-16T20:12:00.510+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Chip: cpu-proc
-2023-06-16T20:12:00.510+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Chip: cpu-tflite
-2023-06-16T20:12:00.510+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Chip: google-edge-tpu-tflite
-2023-06-16T20:12:00.510+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Create larod models
-2023-06-16T20:12:00.510+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: cpu-tflite device connected
-2023-06-16T20:12:00.635+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: 1 inputs, 4 outputs
-2023-06-16T20:12:00.635+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map: Setting up a temp fd with pattern /tmp/larod.in.test-XXXXXX and size 270000
-2023-06-16T20:12:00.635+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Model model/converted_model.tflite loaded
-2023-06-16T20:12:00.636+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Calculate crop image
-2023-06-16T20:12:00.636+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Crop VDO image X=224 Y=0 (576 x 576)
-2023-06-16T20:12:00.636+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map deleted size:270000 file:/tmp/larod.in.test-LXrzLO
-2023-06-16T20:12:00.636+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Set input tensors
-2023-06-16T20:12:00.637+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Create preprocessing maps
-2023-06-16T20:12:00.643+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: 'buffer.strategy': <uint32 3>
-2023-06-16T20:12:00.643+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: 'channel'--------: <uint32 1>
-2023-06-16T20:12:00.643+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: 'format'---------: <uint32 3>
-2023-06-16T20:12:00.643+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: 'height'---------: <uint32 576>
-2023-06-16T20:12:00.643+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: 'width'----------: <uint32 1024>
-2023-06-16T20:12:00.643+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Create input/output tensors
-2023-06-16T20:12:00.643+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Determine tensor buffer sizes
-2023-06-16T20:12:00.643+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Loading preprocessing model with chip cpu-proc
-2023-06-16T20:12:00.643+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map: Setting up a temp fd with pattern /tmp/crop.test-XXXXXX and size 1769472
-2023-06-16T20:12:00.643+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map: Setting up a temp fd with pattern /tmp/larod.pp.test-XXXXXX and size 884736
-2023-06-16T20:12:00.646+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Connect tensors to file descriptors
-2023-06-16T20:12:00.646+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Create job requests
-2023-06-16T20:12:00.646+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map deleted size:320 file:/tmp/larod.out1.test-v6ExpS
-2023-06-16T20:12:00.646+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map deleted size:320 file:/tmp/larod.out1.test-v6ExpS
-2023-06-16T20:12:00.646+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map deleted size:320 file:/tmp/larod.out1.test-v6ExpS
-2023-06-16T20:12:00.646+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map deleted size:80 file:/tmp/larod.out2.test-FWkY2x
-2023-06-16T20:12:00.646+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map: Setting up a temp fd with pattern /tmp/larod.out1.test-XXXXXX and size 320
-2023-06-16T20:12:00.646+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map: Setting up a temp fd with pattern /tmp/larod.out2.test-XXXXXX and size 80
-2023-06-16T20:12:00.646+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map: Setting up a temp fd with pattern /tmp/larod.out3.test-XXXXXX and size 80
-2023-06-16T20:12:00.646+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Set output tensors
-2023-06-16T20:12:00.648+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map deleted size:80 file:/tmp/larod.out2.test-FWkY2x
-2023-06-16T20:12:00.648+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map deleted size:80 file:/tmp/larod.out3.test-94R7PU
-2023-06-16T20:12:00.648+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map: Setting up a temp fd with pattern /tmp/larod.out4.test-XXXXXX and size 4
-2023-06-16T20:12:00.658+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Dump of vdo stream settings map =====
-2023-06-16T20:12:00.658+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Map deleted size:4 file:/tmp/larod.out4.test-6wMjso
-2023-06-16T20:12:00.658+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Read 90 labels from label/labels.txt
-2023-06-16T20:12:00.801+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Start fetching video frames from VDO
-2023-06-16T20:12:01.391+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Marker:10
-2023-06-16T20:12:01.411+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: '1': 0.000000
-2023-06-16T20:12:01.432+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Converted image in 17 ms
-2023-06-16T20:12:01.433+09:00 axis-b8a44f27a336 [ ERR     ] snow_depth[2895]: Unable to rewind output file position: Illegal seek
-2023-06-16T20:12:01.553+09:00 axis-b8a44f27a336 [ ERR     ] snow_depth[2895]: Not Detected
-2023-06-16T20:12:02.032+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Marker:10
-2023-06-16T20:12:02.048+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: '1': 0.000000
-2023-06-16T20:12:02.069+09:00 axis-b8a44f27a336 [ ERR     ] snow_depth[2895]: Unable to rewind output file position: Illegal seek
-2023-06-16T20:12:02.069+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2895]: Converted image in 18 ms
+2023-06-16T20:29:18.962+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Running OpenCV example with VDO as video source
+2023-06-16T20:29:18.979+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: /usr/local/packages/snow_depth/config/AXIS_Q6215-LE.xml loaded
+2023-06-16T20:29:19.419+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Creating VDO image provider and creating stream 1024 x 576
+2023-06-16T20:29:19.419+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: chooseStreamResolution: We select stream w/h=1024 x 576 based on VDO channel info.
+2023-06-16T20:29:19.686+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: cpu-tflite device connected
+2023-06-16T20:29:19.692+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Available chip IDs:
+2023-06-16T20:29:19.692+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Chip: axis-a7-gpu-proc
+2023-06-16T20:29:19.692+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Chip: axis-a7-gpu-tflite
+2023-06-16T20:29:19.692+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Chip: axis-ace-proc
+2023-06-16T20:29:19.692+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Chip: cpu-proc
+2023-06-16T20:29:19.692+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Chip: cpu-tflite
+2023-06-16T20:29:19.692+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Chip: google-edge-tpu-tflite
+2023-06-16T20:29:19.692+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Create larod models
+2023-06-16T20:29:20.096+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: 'buffer.strategy': <uint32 3>
+2023-06-16T20:29:20.096+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: 'channel'--------: <uint32 1>
+2023-06-16T20:29:20.096+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: 'format'---------: <uint32 3>
+2023-06-16T20:29:20.096+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: 'height'---------: <uint32 576>
+2023-06-16T20:29:20.096+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: 'width'----------: <uint32 1024>
+2023-06-16T20:29:20.096+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: 1 inputs, 4 outputs
+2023-06-16T20:29:20.096+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map deleted size:270000 file:/tmp/larod.in.test-1Il3wY
+2023-06-16T20:29:20.096+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map: Setting up a temp fd with pattern /tmp/larod.in.test-XXXXXX and size 270000
+2023-06-16T20:29:20.096+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Model model/converted_model.tflite loaded
+2023-06-16T20:29:20.096+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Set input tensors
+2023-06-16T20:29:20.098+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Calculate crop image
+2023-06-16T20:29:20.099+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Create preprocessing maps
+2023-06-16T20:29:20.099+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Crop VDO image X=224 Y=0 (576 x 576)
+2023-06-16T20:29:20.100+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Loading preprocessing model with chip cpu-proc
+2023-06-16T20:29:20.101+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Create input/output tensors
+2023-06-16T20:29:20.101+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Determine tensor buffer sizes
+2023-06-16T20:29:20.101+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map: Setting up a temp fd with pattern /tmp/larod.pp.test-XXXXXX and size 884736
+2023-06-16T20:29:20.102+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Connect tensors to file descriptors
+2023-06-16T20:29:20.102+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Create job requests
+2023-06-16T20:29:20.102+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map: Setting up a temp fd with pattern /tmp/crop.test-XXXXXX and size 1769472
+2023-06-16T20:29:20.103+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map deleted size:320 file:/tmp/larod.out1.test-qSNBvx
+2023-06-16T20:29:20.103+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map: Setting up a temp fd with pattern /tmp/larod.out1.test-XXXXXX and size 320
+2023-06-16T20:29:20.103+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Set output tensors
+2023-06-16T20:29:20.104+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map deleted size:320 file:/tmp/larod.out1.test-qSNBvx
+2023-06-16T20:29:20.104+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map: Setting up a temp fd with pattern /tmp/larod.out2.test-XXXXXX and size 80
+2023-06-16T20:29:20.105+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map deleted size:320 file:/tmp/larod.out1.test-qSNBvx
+2023-06-16T20:29:20.105+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map deleted size:80 file:/tmp/larod.out2.test-cXV8Wm
+2023-06-16T20:29:20.105+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map: Setting up a temp fd with pattern /tmp/larod.out3.test-XXXXXX and size 80
+2023-06-16T20:29:20.106+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map deleted size:80 file:/tmp/larod.out2.test-cXV8Wm
+2023-06-16T20:29:20.106+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map deleted size:80 file:/tmp/larod.out3.test-AQbpiG
+2023-06-16T20:29:20.120+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Dump of vdo stream settings map =====
+2023-06-16T20:29:20.120+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map deleted size:4 file:/tmp/larod.out4.test-7RtsWI
+2023-06-16T20:29:20.120+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Map: Setting up a temp fd with pattern /tmp/larod.out4.test-XXXXXX and size 4
+2023-06-16T20:29:20.120+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Read 90 labels from label/labels.txt
+2023-06-16T20:29:20.257+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Start fetching video frames from VDO
+2023-06-16T20:29:20.773+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Marker:10
+2023-06-16T20:29:20.798+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: '1': 0.000000
+2023-06-16T20:29:20.817+09:00 axis-b8a44f27a336 [ ERR     ] snow_depth[2349]: Unable to rewind output 1 file position: Illegal seek 14
+2023-06-16T20:29:20.817+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Converted image in 17 ms
+2023-06-16T20:29:20.942+09:00 axis-b8a44f27a336 [ ERR     ] snow_depth[2349]: Not Detected
+2023-06-16T20:29:21.383+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: Marker:10
+2023-06-16T20:29:21.401+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2349]: '1': 0.000000
+2023-06-16T20:29:21.416+09:00 axis-b8a44f27a336 [ ERR     ] snow_depth[2349]: Unable to rewind output 1 file position: Illegal seek 14
