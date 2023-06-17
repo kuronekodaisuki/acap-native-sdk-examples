@@ -8,6 +8,8 @@ class Object
 public:
     int label;
     float prob;
+    float x, y;
+    float width, height;
 
     bool operator<(const Object& right) const
     {
@@ -21,6 +23,7 @@ public:
     YOLOX(size_t streamWidth, size_t streamHeight, const char* device = "cpu-tflite");
     ~YOLOX();
 
+    void postProcess(const int width, const int height, float scaleX, float scaleY);
 private:
     struct GridAndStride
     {
@@ -41,6 +44,4 @@ private:
     std::vector<GridAndStride> generate_grids_and_strides();
     void generate_yolox_proposals(float bbox_threshold);
     void nms_sorted_bboxes(const std::vector<Object>& faceobjects, std::vector<int>& picked, float nms_threshold);
-
-
 }
