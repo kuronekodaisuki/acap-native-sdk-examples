@@ -164,4 +164,4 @@ RUN mkdir -p model && \
 WORKDIR /opt/app
 
 RUN . /opt/axis/acapsdk/environment-setup* && acap-build .\
-    -a 'config/AXIS_Q6215-LE.xml' -a 'label/labels.txt' -a 'model/converted_model.tflite'
+    -a 'config/AXIS_Q6215-LE.xml' -a 'label/labels.txt' -a 'model/converted_model.tflite' -a 'model/yolox_nano_int8_quantize.tflite'

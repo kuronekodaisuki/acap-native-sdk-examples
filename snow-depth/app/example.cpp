@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
   Larod larod(streamWidth, streamHeight);
   larod.EnumerateDevices();
 
-  larod.LoadModel("model/converted_model.tflite", 300, 300);
+  larod.LoadModel("model/yolox_nano_int8_quantize.tflite", 416, 416);
   larod.LoadLabels("label/labels.txt");
 
   provider = createImgProvider(streamWidth, streamHeight, 2, VDO_FORMAT_YUV);
