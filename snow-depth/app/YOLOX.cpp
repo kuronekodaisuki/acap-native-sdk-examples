@@ -1,9 +1,15 @@
+#include <math.h>
 #include "YOLOX.hpp"
 
-YOLOX::YOLOX(size_t streamWidth, size_t streamHeight, const char* device = "cpu-tflite"):
+YOLOX::YOLOX(size_t streamWidth, size_t streamHeight, const char* device):
 Larod(streamWidth, streamHeight, device)
 {
   _grid_strides = generate_grids_and_strides();
+}
+
+YOLOX::~YOLOX()
+{
+
 }
 
 void YOLOX::postProcess(const int width, const int height, float scaleX, float scaleY)
@@ -40,8 +46,8 @@ std::vector<GridAndStride> YOLOX::generate_grids_and_strides()
     std::vector<GridAndStride> grid_strides;
     for (auto stride : strides)
     {
-        int num_grid_y = _height / stride;
-        int num_grid_x = _width / stride;
+        int num_grid_y = _modelHeight / stride;
+        int num_grid_x = _modelWidth / stride;
         for (int g1 = 0; g1 < num_grid_y; g1++)
         {
             for (int g0 = 0; g0 < num_grid_x; g0++)
@@ -50,7 +56,7 @@ std::vector<GridAndStride> YOLOX::generate_grids_and_strides()
             }
         }
     }
-    _numClasses = _output_shape[2] - 5;
+    _numClasses = _labels.GetCount();
 
     return grid_strides;
 }
@@ -77,7 +83,7 @@ void YOLOX::generate_yolox_proposals(float prob_threshold)
         float x0 = x_center - w / 2;
         float y0 = y_center - h / 2;
 
-        cv::Rect_<float> bound(x0, y0, w, h);
+        //cv::Rect_<float> bound(x0, y0, w, h);
 
         for (size_t class_idx = 0; class_idx < _numClasses; class_idx++)
         {
@@ -86,7 +92,7 @@ void YOLOX::generate_yolox_proposals(float prob_threshold)
             if (prob_threshold < box_prob)
             {
                 Object obj;
-                obj.rect = bound;
+                //obj.rect = bound;
                 obj.label = (int)class_idx;
                 obj.prob = box_prob;
 
@@ -107,7 +113,7 @@ void YOLOX::nms_sorted_bboxes(const std::vector<Object>& objects, std::vector<in
     std::vector<float> areas(n);
     for (size_t i = 0; i < n; i++)
     {
-        areas[i] = objects[i].rect.area();
+        areas[i] = objects[i].width * objects[i].height;
     }
 
     for (size_t i = 0; i < n; i++)
@@ -120,7 +126,7 @@ void YOLOX::nms_sorted_bboxes(const std::vector<Object>& objects, std::vector<in
             const Object& b = objects[picked[j]];
 
             // intersection over union
-            float inter_area = (a.rect & b.rect).area();
+            float inter_area = a.Intersection(b);
             float union_area = areas[i] + areas[picked[j]] - inter_area;
             // float IoU = inter_area / union_area
             if (nms_threshold < inter_area / union_area)
