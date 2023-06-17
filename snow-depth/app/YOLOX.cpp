@@ -13,8 +13,10 @@ YOLOX::~YOLOX()
 
 }
 
-void YOLOX::postProcess(const int width, const int height, float scaleX, float scaleY)
+bool YOLOX::PostProcess()
 {
+    float scaleX = _modelWidth / _streamWidth;
+    float scaleY = _modelHeight / _streamHeight;
     _output = (float*)_outputs[0].GetPtr();
     _proposals.clear();
     generate_yolox_proposals(_bbox_confidential_threshold);
@@ -39,6 +41,7 @@ void YOLOX::postProcess(const int width, const int height, float scaleX, float s
         _objects[i].width /= scaleX;
         _objects[i].height /= scaleY;
     }
+    return true;
 }
 
 std::vector<YOLOX::GridAndStride> YOLOX::generate_grids_and_strides()

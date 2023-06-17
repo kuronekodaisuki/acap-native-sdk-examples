@@ -21,7 +21,7 @@ public:
     inline float Bottom() const {return y + height;}
 
     /// @brief Area of intersection
-    /// @param right
+    /// @param obj
     /// @return
     float IntersectionArea(const Object& obj) const
     {
@@ -77,7 +77,7 @@ public:
     /// @param height
     /// @param scaleX
     /// @param scaleY
-    void postProcess(const int width, const int height, float scaleX, float scaleY);
+    bool PostProcess();
 
 private:
     struct GridAndStride
