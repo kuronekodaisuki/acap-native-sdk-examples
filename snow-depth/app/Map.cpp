@@ -13,8 +13,7 @@
 
 Map::Map(size_t fileSize, char* fileName): _size(fileSize), _filename(fileName)
 {
-    syslog(LOG_INFO, "%s: Setting up a temp fd with pattern %s and size %zu", __func__,
-           fileName, fileSize);
+    syslog(LOG_INFO, "%s", __func__);
 
     int fd = mkstemp(fileName);
     if (0 <= fd)
@@ -33,6 +32,7 @@ Map::Map(size_t fileSize, char* fileName): _size(fileSize), _filename(fileName)
             // SUCCESS
             _mappedAddr = data;
             _handle = fd;
+            syslog(LOG_INFO, "Mapped with pattern %s and size %zu as handle:%d addr:%x", fileName, fileSize, _handle, _mappedAddr);
           }
           else
           {
@@ -62,4 +62,6 @@ Map::~Map()
     munmap(_mappedAddr, _size);
   if (0 <= _handle)
     close(_handle);
+  _handle = -1;
+  _mappedAddr = nullptr;
 }

@@ -113,28 +113,19 @@ bool YOLOX::DoInference(u_char* data)
     struct timeval startTs, endTs;
     unsigned int elapsedMs = 0;
 
+    syslog(LOG_INFO, "Copied to input tensor handle:%d addr:%x", _inputs[0].GetHandle(), _inputs[0].GetPtr());
+
     memcpy(_inputs[0].GetPtr(), data, _modelWidth * _modelHeight * _channels);
-/*
-    // Get data from latest frame.
-    uint8_t* nv12Data = (uint8_t*) vdo_buffer_get_data(buf);
+    syslog(LOG_INFO, "Copied to input tensor done");
 
-    // Covert image data from NV12 format to interleaved uint8_t RGB format.
-    gettimeofday(&startTs, NULL);
-
-    // Convert YUV to RGB
-    memcpy(_preProcess->GetPtr(), nv12Data, _yuyvBufferSize);
-    if (!larodRunJob(_connection, _ppRequest, &_error)) {
-        syslog(LOG_ERR, "Unable to run job to preprocess model: %s (%d)",
-                _error->msg, _error->code);
-        return false;
+    // Since larodOutputAddr points to the beginning of the fd we should
+    // rewind the file position before each job.
+    if (lseek(_outputs[0].GetHandle(), 0, SEEK_SET) == -1) {
+        syslog(LOG_ERR, "Unable to rewind output file position: %s %d",
+                strerror(errno), _outputs[0].GetHandle());
+      return false;
     }
 
-    gettimeofday(&endTs, NULL);
-
-    elapsedMs = (unsigned int) (((endTs.tv_sec - startTs.tv_sec) * 1000) +
-                                ((endTs.tv_usec - startTs.tv_usec) / 1000));
-    syslog(LOG_INFO, "Converted image in %u ms", elapsedMs);
-*/
     gettimeofday(&startTs, NULL);
     if (!larodRunJob(_connection, _InferRequest, &_error)) {
         syslog(LOG_ERR, "Unable to run inference on model %s (%d)",

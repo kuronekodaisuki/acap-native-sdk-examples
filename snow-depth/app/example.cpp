@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
   ImgProvider_t* provider = NULL;
 
 	// マーカーサイズ40センチ、ポール長さ24メートル
-	SnowDetector detector(SnowDetector::MARKER_6X6, 0.4f, 2.75f);
+	SnowDetector detector(SnowDetector::MARKER_6X6, 0.15f, 1.02f);
   if (2 <= argc)
   {
     if (detector.LoadCameraParameters(argv[1]))
@@ -148,6 +148,7 @@ int main(int argc, char* argv[])
 
     // YOLOX inference
     cv::resize(bgr_mat, resized, cv::Size(MODEL_WIDTH, MODEL_HEIGHT));
+    syslog(LOG_INFO, "Resize to %d x %d", resized.cols, resized.rows);
     yolox.DoInference(resized.ptr());
 
     aruco::detectMarkers(bgr_mat, dictionary, markerCorners, markerIds);
