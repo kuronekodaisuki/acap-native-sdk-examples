@@ -514,6 +514,7 @@ static cv::Vec3d FixRotate(cv::Vec3d T, cv::Vec3d rvec)
 /// <returns></returns>
 float SnowDetector::estimateDepth(cv::Mat bilevel, cv::Mat& image, int index, float poleLength)
 {
+    syslog(LOG_INFO, "%s", __func__);
     float depth = -1;
     _status = OK;
 
@@ -529,6 +530,7 @@ float SnowDetector::estimateDepth(cv::Mat bilevel, cv::Mat& image, int index, fl
 
     if (rvec[1] < 0)
     {
+      syslog(LOG_INFO, "rvec[1]:%f", rvec[1]);
         //
         //rvec = FixRotate(tvec, rvec);
 
@@ -536,6 +538,7 @@ float SnowDetector::estimateDepth(cv::Mat bilevel, cv::Mat& image, int index, fl
         //return -1;
     }
     _theta = sqrt(rvec[0] * rvec[0] + rvec[1] * rvec[1] + rvec[2] * rvec[2]);
+    syslog(LOG_INFO, "Theta:%f", _theta);
 
     //char buffer[200];
     //sprintf(buffer, "Theta:%f R:%f %f %f", _theta * 180 / M_PI, rvec[0], rvec[1], rvec[2]);

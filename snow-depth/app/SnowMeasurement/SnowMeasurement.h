@@ -8,6 +8,7 @@
 #endif
 #else
 #define API
+#include <syslog.h>
 #endif
 
 #ifdef WIN32
@@ -22,7 +23,7 @@
 #include "MovingAvg.h"
 
 
-#define OFFSET 0.08
+#define OFFSET 0.0
 
 #ifdef USE_KALMANFILTER
 class KalmanFilter;
