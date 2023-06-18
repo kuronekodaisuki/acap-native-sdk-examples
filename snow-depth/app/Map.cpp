@@ -32,7 +32,7 @@ Map::Map(size_t fileSize, char* fileName): _size(fileSize), _filename(fileName)
             // SUCCESS
             _mappedAddr = data;
             _handle = fd;
-            syslog(LOG_INFO, "Mapped with pattern %s and size %zu as handle:%d addr:%x", fileName, fileSize, _handle, _mappedAddr);
+            syslog(LOG_INFO, "Mapped with pattern %s and size %zu as handle:%d addr:%p", fileName, fileSize, _handle, _mappedAddr);
           }
           else
           {

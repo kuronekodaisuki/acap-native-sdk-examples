@@ -113,32 +113,46 @@ bool YOLOX::DoInference(u_char* data)
     struct timeval startTs, endTs;
     unsigned int elapsedMs = 0;
 
-    syslog(LOG_INFO, "Copied to input tensor handle:%d addr:%x", _inputs[0].GetHandle(), _inputs[0].GetPtr());
+    u_char* buffer = (u_char*)_inputs[0].GetPtr();
+    syslog(LOG_INFO, "Copy %d bytes to input tensor handle:%d addr:%p",
+    _modelWidth * _modelHeight * _channels,
+    _inputs[0].GetHandle(), _inputs[0].GetPtr());
 
-    memcpy(_inputs[0].GetPtr(), data, _modelWidth * _modelHeight * _channels);
-    syslog(LOG_INFO, "Copied to input tensor done");
+    buffer[0] = 0;
+    syslog(LOG_INFO, "First byte of buffer:%d", buffer[0]);
 
-    // Since larodOutputAddr points to the beginning of the fd we should
-    // rewind the file position before each job.
-    if (lseek(_outputs[0].GetHandle(), 0, SEEK_SET) == -1) {
-        syslog(LOG_ERR, "Unable to rewind output file position: %s %d",
-                strerror(errno), _outputs[0].GetHandle());
+    try
+    {
+      memcpy(_inputs[0].GetPtr(), data, _modelWidth * _modelHeight * _channels);
+      syslog(LOG_INFO, "Copied to input tensor done");
+      // Since larodOutputAddr points to the beginning of the fd we should
+      // rewind the file position before each job.
+      if (lseek(_outputs[0].GetHandle(), 0, SEEK_SET) == -1) {
+          syslog(LOG_ERR, "Unable to rewind output file position: %s %d",
+                  strerror(errno), _outputs[0].GetHandle());
+        return false;
+      }
+
+      gettimeofday(&startTs, NULL);
+      if (!larodRunJob(_connection, _InferRequest, &_error)) {
+          syslog(LOG_ERR, "Unable to run inference on model %s (%d)",
+                  _error->msg, _error->code);
+        return false;
+      }
+      gettimeofday(&endTs, NULL);
+
+      elapsedMs = (unsigned int) (((endTs.tv_sec - startTs.tv_sec) * 1000) +
+                                  ((endTs.tv_usec - startTs.tv_usec) / 1000));
+      syslog(LOG_INFO, "Ran inference for %u ms", elapsedMs);
+
+      return PostProcess();
+    }
+    catch(const std::exception& e)
+    {
+      syslog(LOG_ERR, "Exception %s", e.what());
       return false;
     }
 
-    gettimeofday(&startTs, NULL);
-    if (!larodRunJob(_connection, _InferRequest, &_error)) {
-        syslog(LOG_ERR, "Unable to run inference on model %s (%d)",
-                _error->msg, _error->code);
-      return false;
-    }
-    gettimeofday(&endTs, NULL);
-
-    elapsedMs = (unsigned int) (((endTs.tv_sec - startTs.tv_sec) * 1000) +
-                                ((endTs.tv_usec - startTs.tv_usec) / 1000));
-    syslog(LOG_INFO, "Ran inference for %u ms", elapsedMs);
-
-    return PostProcess();
   }
   syslog(LOG_ERR, "Failed to Inference");
   return false;
