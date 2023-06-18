@@ -538,7 +538,6 @@ float SnowDetector::estimateDepth(cv::Mat bilevel, cv::Mat& image, int index, fl
         //return -1;
     }
     _theta = sqrt(rvec[0] * rvec[0] + rvec[1] * rvec[1] + rvec[2] * rvec[2]);
-    syslog(LOG_INFO, "Theta:%f", _theta);
 
     //char buffer[200];
     //sprintf(buffer, "Theta:%f R:%f %f %f", _theta * 180 / M_PI, rvec[0], rvec[1], rvec[2]);
@@ -571,14 +570,16 @@ float SnowDetector::estimateDepth(cv::Mat bilevel, cv::Mat& image, int index, fl
 
     //
     double angle = (double)atan2((leftBottom.y - leftTop.y), (leftBottom.x - leftTop.x)) * 180 / M_PI;
-
     float width = sqrt((leftTop.x - rightTop.x) * (leftTop.x - rightTop.x) + (leftTop.y - rightTop.y) * (leftTop.y - rightTop.y));
     float height = sqrt((leftTop.x - leftBottom.x) * (leftTop.x - leftBottom.x) + (leftTop.y - leftBottom.y) * (leftTop.y - leftBottom.y));
+    syslog(LOG_INFO, "Angle:%f width:%f height:%f", angle, width, height);
+
     //
     _deskew = RotateAndCrop(_grayscale, center.x, center.y, angle - 90, (int)width * 2, (int)height);
     // deskew
     cv::Mat bi;
     double threshold = cv::threshold(_grayscale, bi, 0, 255, cv::THRESH_OTSU) * MARGIN;
+    syslog(LOG_INFO, "Threshold:%f", threshold);
 #ifdef _DEBUIG
     std::cout << threshold << std::endl;
 #endif
@@ -621,7 +622,7 @@ float SnowDetector::estimateDepth(cv::Mat bilevel, cv::Mat& image, int index, fl
 
                 break;
             }
-            //printf_s("Y:%d value: %d\n", y, value);
+            syslog(LOG_INFO, "Y:%d value: %d\n", y, value);
         }
     }
     else
