@@ -72,10 +72,21 @@ public:
     /// @brief Destructor
     ~YOLOX();
 
+    size_t LoadLabels(const char* filename);
+
+    /// @brief Load YOLOX model
+    /// @param filename
+    /// @param width
+    /// @param height
+    /// @param channels
+    /// @param modelname
+    /// @return
+    bool LoadModel(const char* filename, size_t width, size_t height, size_t channels = 3, const char* modelname = "inference");
+
     /// @brief Do inference
     /// @param yuvData
     /// @return
-    bool DoInference(VdoBuffer* yuvData);
+    bool DoInference(u_char* data);
 
     /// @brief Post process
     /// @param width
@@ -101,7 +112,7 @@ private:
     std::vector<Object> _objects;
     std::vector<GridAndStride> _grid_strides;
 
-    std::vector<GridAndStride> generate_grids_and_strides();
+    std::vector<GridAndStride> generate_grids_and_strides(size_t width, size_t height);
     void generate_yolox_proposals(float bbox_threshold);
     void nms_sorted_bboxes(const std::vector<Object>& objects, std::vector<int>& picked, float nms_threshold);
 };

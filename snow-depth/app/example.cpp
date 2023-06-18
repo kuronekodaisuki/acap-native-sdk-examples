@@ -33,6 +33,12 @@
 
 using namespace cv;
 
+size_t MODEL_WIDTH = 416;
+size_t MODEL_HEIGHT = 416;
+const char* MODEL = "model/yolox_nano_int8_quantize.tflite";
+const char* LABEL = "label/coco_classes.txt";
+
+
 /// @brief Decode JSON data
 /// @param filename
 void readConfig(const char* filename)
@@ -91,8 +97,8 @@ int main(int argc, char* argv[])
   yolox.EnumerateDevices();
 
   // Load YOLOX_nano model
-  yolox.LoadModel("model/yolox_nano_int8_quantize.tflite", 416, 416);
-  yolox.LoadLabels("label/labels.txt");
+  yolox.LoadModel(MODEL, MODEL_WIDTH, MODEL_HEIGHT);
+  yolox.LoadLabels(LABEL);
 
   provider = createImgProvider(streamWidth, streamHeight, 2, VDO_FORMAT_YUV);
   if (!provider) {
@@ -118,6 +124,7 @@ int main(int argc, char* argv[])
   Mat bgr_mat = Mat(height, width, CV_8UC3);
   Mat nv12_mat = Mat(height * 3 / 2, width, CV_8UC1);
   Mat fg;
+  Mat resized;
 
   while (true)
   {
@@ -139,7 +146,9 @@ int main(int argc, char* argv[])
     float depth = detector.Detect(bgr_mat);
     syslog(LOG_INFO, "'%d': %f", detector.GetStatus(), depth);
 
-    yolox.DoInference(buf);
+    // YOLOX inference
+    cv::resize(bgr_mat, resized, cv::Size(MODEL_WIDTH, MODEL_HEIGHT));
+    yolox.DoInference(resized.ptr());
 
     aruco::detectMarkers(bgr_mat, dictionary, markerCorners, markerIds);
     aruco::drawDetectedMarkers(bgr_mat, markerCorners);

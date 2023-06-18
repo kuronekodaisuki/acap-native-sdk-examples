@@ -1,13 +1,31 @@
 #include <algorithm>
 #include <math.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <syslog.h>
+#include <unistd.h>
+#include <string.h>
+#include <syslog.h>
+#include <opencv2/imgproc.hpp>
 
 #include "YOLOX.hpp"
+
+const size_t OUTPUTSIZE = 85 * 3549 * sizeof(float);
+
+// Name patterns for the temp file we will create.
+char CONV_IN_FILE_PATTERN[] = "/tmp/larod.in.test-XXXXXX";
+char CONV_OUT_FILE_PATTERN[] = "/tmp/larod.out1.test-XXXXXX";
 
 YOLOX::YOLOX(size_t streamWidth, size_t streamHeight, const char* device):
 Larod(streamWidth, streamHeight, device)
 {
-  _grid_strides = generate_grids_and_strides();
+      syslog(LOG_INFO, "%s", __func__);
 }
 
 YOLOX::~YOLOX()
@@ -15,13 +33,88 @@ YOLOX::~YOLOX()
 
 }
 
-bool YOLOX::DoInference(VdoBuffer* buf)
+size_t YOLOX::LoadLabels(const char* filename)
 {
+  syslog(LOG_INFO, "%s load", filename);
+  _numClasses = _labels.Load(filename);
+  return _numClasses;
+}
+
+bool YOLOX::LoadModel(const char* filename, size_t width, size_t height, size_t channels, const char* modelname)
+{
+      syslog(LOG_INFO, "%s", __func__);
+    _modelWidth = width;
+    _modelHeight = height;
+    _channels = channels;
+    _grid_strides = generate_grids_and_strides(width, height);
+
+    // Create larod models
+    syslog(LOG_INFO, "Create larod models");
+    const int fd = open(filename, O_RDONLY);
+    if (0 <= fd)
+    {
+        _model = larodLoadModel(_connection, fd, _device, LAROD_ACCESS_PRIVATE,
+                                 modelname, NULL, &_error);
+        close(fd);
+        if (!_model)
+        {
+          syslog(LOG_ERR, "%s: Unable to load model: %s", __func__, _error->msg);
+          return false;
+        }
+        else
+        {
+          syslog(LOG_INFO, "Model %s loaded", filename);
+
+          _inputTensors = larodCreateModelInputs(_model, &_numInputs, &_error);
+          _outputTensors = larodCreateModelOutputs(_model, &_numOutputs, &_error);
+          syslog(LOG_INFO, "%d inputs, %d outputs", _numInputs, _numOutputs);
+
+          // Prepare input buffer
+          _inputs.push_back(Map(width * height * channels, CONV_IN_FILE_PATTERN));
+          syslog(LOG_INFO, "Set input tensors");
+          if (!larodSetTensorFd(_inputTensors[0], _inputs[0].GetHandle(), &_error)) {
+            syslog(LOG_ERR, "Failed setting input tensor fd: %s", _error->msg);
+            return false;
+          }
+
+          // Prepare output buffer
+          _outputs.push_back(Map(OUTPUTSIZE, CONV_OUT_FILE_PATTERN));
+          syslog(LOG_INFO, "Set output tensors");
+          if (!larodSetTensorFd(_outputTensors[0], _outputs[0].GetHandle(), &_error)) {
+              syslog(LOG_ERR, "Failed setting output tensor fd: %s", _error->msg);
+              return false;
+          }
+
+          // Create Request of inference
+          _InferRequest = larodCreateJobRequest(_model,
+                                          _inputTensors, _numInputs,
+                                          _outputTensors, _numOutputs,
+                                          NULL, &_error);
+          if (!_InferRequest)
+          {
+            syslog(LOG_ERR, "%s: Failed to create inference request %s", __func__, _error->msg);
+            return false;
+          }
+          return true;
+        }
+    }
+    else
+    {
+        syslog(LOG_ERR, "Unable to open model file %s: %s", filename, strerror(errno));
+        return false;
+    }
+}
+
+bool YOLOX::DoInference(u_char* data)
+{
+  syslog(LOG_INFO, "%s", __func__);
   if (_connection && _InferRequest)
   {
     struct timeval startTs, endTs;
     unsigned int elapsedMs = 0;
 
+    memcpy(_inputs[0].GetPtr(), data, _modelWidth * _modelHeight * _channels);
+/*
     // Get data from latest frame.
     uint8_t* nv12Data = (uint8_t*) vdo_buffer_get_data(buf);
 
@@ -41,7 +134,7 @@ bool YOLOX::DoInference(VdoBuffer* buf)
     elapsedMs = (unsigned int) (((endTs.tv_sec - startTs.tv_sec) * 1000) +
                                 ((endTs.tv_usec - startTs.tv_usec) / 1000));
     syslog(LOG_INFO, "Converted image in %u ms", elapsedMs);
-
+*/
     gettimeofday(&startTs, NULL);
     if (!larodRunJob(_connection, _InferRequest, &_error)) {
         syslog(LOG_ERR, "Unable to run inference on model %s (%d)",
@@ -91,15 +184,16 @@ bool YOLOX::PostProcess()
     return true;
 }
 
-std::vector<YOLOX::GridAndStride> YOLOX::generate_grids_and_strides()
+std::vector<YOLOX::GridAndStride> YOLOX::generate_grids_and_strides(size_t width, size_t height)
 {
+    syslog(LOG_INFO, "%s", __func__);
     std::vector<int> strides = { 8, 16, 32 };
 
     std::vector<GridAndStride> grid_strides;
     for (auto stride : strides)
     {
-        int num_grid_y = _modelHeight / stride;
-        int num_grid_x = _modelWidth / stride;
+        int num_grid_y = height / stride;
+        int num_grid_x = width / stride;
         for (int g1 = 0; g1 < num_grid_y; g1++)
         {
             for (int g0 = 0; g0 < num_grid_x; g0++)
@@ -108,8 +202,7 @@ std::vector<YOLOX::GridAndStride> YOLOX::generate_grids_and_strides()
             }
         }
     }
-    _numClasses = _labels.GetCount();
-
+      syslog(LOG_INFO, "%s end", __func__);
     return grid_strides;
 }
 
@@ -151,9 +244,7 @@ void YOLOX::generate_yolox_proposals(float prob_threshold)
 
                 _proposals.push_back(obj);
             }
-
         } // class loop
-
     } // point anchor loop
 }
 

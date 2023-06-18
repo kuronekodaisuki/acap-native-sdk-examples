@@ -9,6 +9,7 @@
 #include <syslog.h>
 #include <unistd.h>
 #include <string.h>
+#include <opencv2/imgproc.hpp>
 
 #include "Larod.hpp"
 
@@ -16,7 +17,7 @@
 const size_t CHANNELS = 3;
 // Hardcode to set output bytes of four tensors from MobileNet V2 model.
 const size_t FLOATSIZE = 4;
-const size_t TENSOR1SIZE = 301665 * FLOATSIZE;
+const size_t TENSOR1SIZE = 80 * FLOATSIZE;
 const size_t TENSOR2SIZE = 20 * FLOATSIZE;
 const size_t TENSOR3SIZE = 20 * FLOATSIZE;
 const size_t TENSOR4SIZE = 1 * FLOATSIZE;
@@ -201,13 +202,14 @@ bool Larod::LoadModel(const char* filename, size_t width, size_t height, size_t 
 
 /// @brief Do Inference
 /// @return
-bool Larod::DoInference(VdoBuffer* buf)
+bool Larod::DoInference(u_char* data)
 {
   if (_connection && _InferRequest)
   {
     struct timeval startTs, endTs;
     unsigned int elapsedMs = 0;
 
+/*
     // Get data from latest frame.
     uint8_t* nv12Data = (uint8_t*) vdo_buffer_get_data(buf);
 
@@ -227,6 +229,7 @@ bool Larod::DoInference(VdoBuffer* buf)
     elapsedMs = (unsigned int) (((endTs.tv_sec - startTs.tv_sec) * 1000) +
                                 ((endTs.tv_usec - startTs.tv_usec) / 1000));
     syslog(LOG_INFO, "Converted image in %u ms", elapsedMs);
+*/
 
     // Since larodOutputAddr points to the beginning of the fd we should
     // rewind the file position before each job.

@@ -20,7 +20,7 @@ public:
     /// @brief Load labels
     /// @param filename
     /// @return
-    size_t LoadLabels(const char* filename);
+    virtual size_t LoadLabels(const char* filename);
 
     /// @brief Enumerate device
     void EnumerateDevices();
@@ -36,7 +36,7 @@ public:
 
     /// @brief Do inference
     /// @return
-    virtual bool DoInference(VdoBuffer* yuvData);
+    virtual bool DoInference(u_char* data);
 
 protected:
     virtual bool CreatePreProcessModel();
