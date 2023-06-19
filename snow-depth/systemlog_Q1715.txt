@@ -1,46 +1,88 @@
 ----- Contents of SYSTEM_LOG for 'snow_depth' -----
 
 
-02023-06-18T19:27:51.792+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Running OpenCV example with VDO as video source
-2023-06-18T19:27:51.811+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: /usr/local/packages/snow_depth/config/AXIS_Q6215-LE.xml loaded
-2023-06-18T19:27:52.162+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Creating VDO image provider and creating stream 1024 x 576
-2023-06-18T19:27:52.162+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: chooseStreamResolution: We select stream w/h=1024 x 576 based on VDO channel info.
-2023-06-18T19:27:52.502+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Available chip IDs:
-2023-06-18T19:27:52.502+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Chip: axis-a7-gpu-tflite
-2023-06-18T19:27:52.502+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Chip: axis-ace-proc
-2023-06-18T19:27:52.502+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Chip: cpu-proc
-2023-06-18T19:27:52.502+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Chip: cpu-tflite
-2023-06-18T19:27:52.502+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Chip: google-edge-tpu-tflite
-2023-06-18T19:27:52.502+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: YOLOX
-2023-06-18T19:27:52.502+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: cpu-tflite device connected
-2023-06-18T19:27:52.505+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Chip: axis-a7-gpu-proc
-2023-06-18T19:27:52.505+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Create larod models
-2023-06-18T19:27:52.505+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: LoadModel
-2023-06-18T19:27:52.505+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: generate_grids_and_strides
-2023-06-18T19:27:52.505+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: generate_grids_and_strides end
-2023-06-18T19:27:52.612+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: 'buffer.strategy': <uint32 3>
-2023-06-18T19:27:52.612+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: 'channel'--------: <uint32 1>
-2023-06-18T19:27:52.612+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: 'format'---------: <uint32 3>
-2023-06-18T19:27:52.612+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: 'height'---------: <uint32 576>
-2023-06-18T19:27:52.612+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: 'width'----------: <uint32 1024>
-2023-06-18T19:27:52.612+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: 1 inputs, 1 outputs
-2023-06-18T19:27:52.612+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Map
-2023-06-18T19:27:52.612+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Mapped with pattern /tmp/larod.in.test-pUSato and size 519168 as handle:10 addr:0x74256000
-2023-06-18T19:27:52.612+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Model model/yolox_nano_int8_quantize.tflite loaded
-2023-06-18T19:27:52.616+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Map deleted size:519168 file:/tmp/larod.in.test-pUSato
-2023-06-18T19:27:52.623+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Map
-2023-06-18T19:27:52.623+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Map deleted size:1206660 file:/tmp/larod.out1.test-e76qNK
-2023-06-18T19:27:52.623+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Mapped with pattern /tmp/larod.out1.test-e76qNK and size 1206660 as handle:10 addr:0x72fd7000
-2023-06-18T19:27:52.623+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Set input tensors
-2023-06-18T19:27:52.623+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Set output tensors
-2023-06-18T19:27:52.624+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Read 80 labels from label/coco_classes.txt
-2023-06-18T19:27:52.624+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: label/coco_classes.txt load
-2023-06-18T19:27:52.625+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Dump of vdo stream settings map =====
-2023-06-18T19:27:52.782+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Start fetching video frames from VDO
-2023-06-18T19:27:52.857+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Resize to 416 x 416
-2023-06-18T19:27:52.864+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Copy 519168 bytes to input tensor handle:10 addr:0x74256000
-2023-06-18T19:27:52.864+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: DoInference
-2023-06-18T19:27:52.865+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: Copied to input tensor done
-2023-06-18T19:27:52.865+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: First byte of buffer:0
-2023-06-18T19:27:52.866+09:00 axis-b8a44f27a336 [ ERR     ] snow_depth[2934]: Unable to rewind output file position: Illegal seek 10
-2023-06-18T19:27:53.102+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[2934]: 10 Detect
+2023-06-18T19:48:32023-06-19T11:17:10.323+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Running OpenCV example with VDO as video source
+2023-06-19T11:17:10.333+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: /usr/local/packages/snow_depth/config/AXIS_Q6215-LE.xml loaded
+2023-06-19T11:17:10.726+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Creating VDO image provider and creating stream 1024 x 576
+2023-06-19T11:17:10.726+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: chooseStreamResolution: We select stream w/h=1024 x 576 based on VDO channel info.
+2023-06-19T11:17:11.048+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Available chip IDs:
+2023-06-19T11:17:11.048+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Chip: axis-a7-gpu-proc
+2023-06-19T11:17:11.048+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Chip: axis-a7-gpu-tflite
+2023-06-19T11:17:11.048+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Chip: axis-ace-proc
+2023-06-19T11:17:11.048+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Chip: cpu-proc
+2023-06-19T11:17:11.048+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Chip: cpu-tflite
+2023-06-19T11:17:11.048+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Chip: google-edge-tpu-tflite
+2023-06-19T11:17:11.048+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: LoadModel
+2023-06-19T11:17:11.048+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: YOLOX
+2023-06-19T11:17:11.048+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: cpu-tflite device connected
+2023-06-19T11:17:11.053+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Create larod models
+2023-06-19T11:17:11.053+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: generate_grids_and_strides
+2023-06-19T11:17:11.053+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: generate_grids_and_strides end
+2023-06-19T11:17:11.454+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: 'buffer.strategy': <uint32 3>
+2023-06-19T11:17:11.454+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: 'channel'--------: <uint32 1>
+2023-06-19T11:17:11.454+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: 'format'---------: <uint32 3>
+2023-06-19T11:17:11.454+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: 'height'---------: <uint32 576>
+2023-06-19T11:17:11.454+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: 'width'----------: <uint32 1024>
+2023-06-19T11:17:11.454+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: 1 inputs, 1 outputs
+2023-06-19T11:17:11.454+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Map
+2023-06-19T11:17:11.454+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Map deleted size:519168 file:/tmp/larod.in.test-8InNB2
+2023-06-19T11:17:11.454+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Mapped with pattern /tmp/larod.in.test-8InNB2 and size 519168 as handle:10 addr:0x74216000
+2023-06-19T11:17:11.454+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Model model/yolox_nano_int8_quantize.tflite loaded
+2023-06-19T11:17:11.456+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Map
+2023-06-19T11:17:11.456+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Mapped with pattern /tmp/larod.out1.test-o5FL7b and size 1206660 as handle:10 addr:0x72fd7000
+2023-06-19T11:17:11.456+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Set input tensors
+2023-06-19T11:17:11.460+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Dump of vdo stream settings map =====
+2023-06-19T11:17:11.460+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Map deleted size:1206660 file:/tmp/larod.out1.test-o5FL7b
+2023-06-19T11:17:11.460+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Read 80 labels from label/coco_classes.txt
+2023-06-19T11:17:11.460+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Set output tensors
+2023-06-19T11:17:11.460+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: label/coco_classes.txt load
+2023-06-19T11:17:11.564+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Start fetching video frames from VDO
+2023-06-19T11:17:11.641+09:00 axis-b8a44f27a336 [ ERR     ] snow_depth[11185]: Unable to rewind output file position: Illegal seek 10
+2023-06-19T11:17:11.641+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copied to input tensor done
+2023-06-19T11:17:11.641+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copy 519168 bytes to input tensor handle:10 addr:0x74216000
+2023-06-19T11:17:11.641+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: DoInference
+2023-06-19T11:17:11.641+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: First byte of buffer:0
+2023-06-19T11:17:11.641+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Resize to 416 x 416
+2023-06-19T11:17:11.858+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: 10 Detect
+2023-06-19T11:17:11.877+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: DoInference
+2023-06-19T11:17:11.877+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Resize to 416 x 416
+2023-06-19T11:17:11.878+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copied to input tensor done
+2023-06-19T11:17:11.878+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copy 519168 bytes to input tensor handle:10 addr:0x74216000
+2023-06-19T11:17:11.878+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: First byte of buffer:0
+2023-06-19T11:17:12.017+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: 10 Detect
+2023-06-19T11:17:12.037+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copied to input tensor done
+2023-06-19T11:17:12.037+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copy 519168 bytes to input tensor handle:10 addr:0x74216000
+2023-06-19T11:17:12.037+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: DoInference
+2023-06-19T11:17:12.037+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: First byte of buffer:0
+2023-06-19T11:17:12.037+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Resize to 416 x 416
+2023-06-19T11:17:12.180+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: 10 Detect
+2023-06-19T11:17:12.198+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copied to input tensor done
+2023-06-19T11:17:12.198+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copy 519168 bytes to input tensor handle:10 addr:0x74216000
+2023-06-19T11:17:12.198+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: DoInference
+2023-06-19T11:17:12.198+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: First byte of buffer:0
+2023-06-19T11:17:12.198+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Resize to 416 x 416
+2023-06-19T11:17:12.322+09:00 axis-b8a44f27a336 [ ERR     ] snow_depth[1113]: Last message 'Unable to rewind out' repeated 3 times, suppressed by syslog-ng on axis-b8a44f27a336
+2023-06-19T11:17:12.341+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: 10 Detect
+2023-06-19T11:17:12.360+09:00 axis-b8a44f27a336 [ ERR     ] snow_depth[11185]: Unable to rewind output file position: Illegal seek 10
+2023-06-19T11:17:12.360+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copied to input tensor done
+2023-06-19T11:17:12.360+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copy 519168 bytes to input tensor handle:10 addr:0x74216000
+2023-06-19T11:17:12.360+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: DoInference
+2023-06-19T11:17:12.360+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: First byte of buffer:0
+2023-06-19T11:17:12.360+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Resize to 416 x 416
+2023-06-19T11:17:12.505+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: 10 Detect
+2023-06-19T11:17:12.524+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copied to input tensor done
+2023-06-19T11:17:12.524+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copy 519168 bytes to input tensor handle:10 addr:0x74216000
+2023-06-19T11:17:12.524+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: DoInference
+2023-06-19T11:17:12.524+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: First byte of buffer:0
+2023-06-19T11:17:12.524+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Resize to 416 x 416
+2023-06-19T11:17:12.677+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: 10 Detect
+2023-06-19T11:17:12.692+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copied to input tensor done
+2023-06-19T11:17:12.692+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copy 519168 bytes to input tensor handle:10 addr:0x74216000
+2023-06-19T11:17:12.692+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: DoInference
+2023-06-19T11:17:12.692+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: First byte of buffer:0
+2023-06-19T11:17:12.692+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Resize to 416 x 416
+2023-06-19T11:17:12.837+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: 10 Detect
+2023-06-19T11:17:12.852+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copied to input tensor done
+2023-06-19T11:17:12.852+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: Copy 519168 bytes to input tensor handle:10 addr:0x74216000
+2023-06-19T11:17:12.852+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: DoInference
+2023-06-19T11:17:12.852+09:00 axis-b8a44f27a336 [ INFO    ] snow_depth[11185]: First byte of buffer:0
