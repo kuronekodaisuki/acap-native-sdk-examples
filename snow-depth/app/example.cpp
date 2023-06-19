@@ -143,8 +143,8 @@ int main(int argc, char* argv[])
     // Convert the NV12 data to BGR
     cvtColor(nv12_mat, bgr_mat, COLOR_YUV2BGR_NV12, 3);
 
-    //float depth = detector.Detect(bgr_mat);
-    //syslog(LOG_INFO, "'%d': %f", detector.GetStatus(), depth);
+    float depth = detector.Detect(bgr_mat);
+    syslog(LOG_INFO, "'%d': %f", detector.GetStatus(), depth);
 
     // YOLOX inference
     cv::resize(bgr_mat, resized, cv::Size(MODEL_WIDTH, MODEL_HEIGHT));

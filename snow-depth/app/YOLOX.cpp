@@ -25,7 +25,9 @@ char CONV_OUT_FILE_PATTERN[] = "/tmp/larod.out1.test-XXXXXX";
 YOLOX::YOLOX(size_t streamWidth, size_t streamHeight, const char* device):
 Larod(streamWidth, streamHeight, device)
 {
-      syslog(LOG_INFO, "%s", __func__);
+    syslog(LOG_INFO, "%s", __func__);
+    _inputs.empty();
+    _outputs.empty();
 }
 
 YOLOX::~YOLOX()
@@ -128,8 +130,8 @@ bool YOLOX::DoInference(u_char* data)
       // Since larodOutputAddr points to the beginning of the fd we should
       // rewind the file position before each job.
       if (lseek(_outputs[0].GetHandle(), 0, SEEK_SET) == -1) {
-          syslog(LOG_ERR, "Unable to rewind output file position: %s %d",
-                  strerror(errno), _outputs[0].GetHandle());
+          syslog(LOG_ERR, "Unable to rewind output file position: %s %d %d",
+                  strerror(errno), errno,  _outputs[0].GetHandle());
         return false;
       }
 
@@ -160,12 +162,14 @@ bool YOLOX::DoInference(u_char* data)
 
 bool YOLOX::PostProcess()
 {
+    syslog(LOG_INFO, "%s", __func__);
     float scaleX = _modelWidth / _streamWidth;
     float scaleY = _modelHeight / _streamHeight;
     _output = (float*)_outputs[0].GetPtr();
     _proposals.clear();
     generate_yolox_proposals(_bbox_confidential_threshold);
 
+    syslog(LOG_INFO, "%d proposals", _proposals.size());
     if (2 <= _proposals.size())
     {
         std::sort(_proposals.begin(), _proposals.end());
@@ -175,7 +179,7 @@ bool YOLOX::PostProcess()
     nms_sorted_bboxes(_proposals, picked, _nms_threshold);
 
     size_t count = picked.size();
-
+    syslog(LOG_INFO, "%d objects", picked.size());
     _objects.resize(count);
     for (size_t i = 0; i < count; i++)
     {
