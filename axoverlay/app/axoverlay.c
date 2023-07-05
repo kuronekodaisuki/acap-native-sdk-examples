@@ -33,6 +33,9 @@
 #include <cairo/cairo.h>
 #include <axoverlay.h>
 #include <syslog.h>
+#include <stdint.h>
+
+#include "imgprovider.h"
 
 #define PALETTE_VALUE_RANGE 255.0
 
@@ -43,6 +46,7 @@ static gint overlay_id_text = -1;
 static gint counter = 10;
 static gint top_color = 1;
 static gint bottom_color = 3;
+ImgProvider_t* provider = NULL;
 
 /***** Drawing functions *****************************************************/
 
@@ -283,6 +287,12 @@ update_overlay_cb(gpointer user_data)
 {
   GError *error = NULL;
 
+  // Get frame buffer
+  VdoBuffer* buffer = getLastFrameBlocking(provider);
+  uint8_t* yuv = (uint8_t*) vdo_buffer_get_data(buffer);
+  // Do something with yuv
+  returnFrame(provider, buffer);
+
   // Countdown
   counter = counter < 1 ? 10 : counter - 1;
 
@@ -419,11 +429,26 @@ main(int argc, char **argv)
 
   // Get max resolution for width and height
   camera_width = axoverlay_get_max_resolution_width(1, &error);
-  g_error_free(error);
+  if (error != NULL) {
+    g_error_free(error);
+  }
   camera_height = axoverlay_get_max_resolution_height(1, &error);
-  g_error_free(error);
+  if (error != NULL) {
+    g_error_free(error);
+  }
   syslog(LOG_INFO, "Max resolution (width x height): %i x %i", camera_width,
          camera_height);
+
+  provider = createImgProvider(camera_width, camera_height, 5, VDO_FORMAT_YUV);
+  if (provider != NULL)
+  {
+    startFrameFetch(provider);
+    syslog(LOG_INFO, "Provider created");
+  }
+  else
+  {
+    syslog(LOG_ERR, "Failed to create provider");
+  }
 
   // Create a large overlay using Palette color space
   struct axoverlay_overlay_data data;
@@ -481,6 +506,12 @@ main(int argc, char **argv)
     syslog(LOG_ERR, "Failed to destroy second overlay: %s", error_text->message);
     g_error_free(error_text);
     return 1;
+  }
+
+  if (provider != NULL)
+  {
+    startFrameFetch(provider);
+    destroyImgProvider(provider);
   }
 
   // Release library resources
