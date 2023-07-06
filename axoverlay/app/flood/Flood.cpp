@@ -1,7 +1,11 @@
 #include <opencv2/calib3d.hpp>
+#include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 
 #include "Flood.h"
+#include "FloodDepth.h"
+
+using namespace cv;
 
 // Scan area Width:25cm AHeight:15cm
 #define WIDTH  0.25f
@@ -13,8 +17,21 @@
 #define FONT_THICKNESS  2
 
 const cv::Scalar RED(0, 0, 255);
-const cv::Scalar YELLO(0, 255, 255);
+const cv::Scalar YELLOW(0, 255, 255);
 const cv::Scalar BLACK(0, 0, 0);
+
+
+extern "C"
+float Depth(uint8_t* yuv, int width, int height)
+{
+    Mat bgr = Mat(height, width, CV_8UC3);
+    Mat nv12 = Mat(height * 3 / 2, width, CV_8UC1, yuv);
+
+    // Convert the NV12 data to BGR
+    cvtColor(nv12, bgr, COLOR_YUV2BGR_NV12, 3);
+
+    return 0;
+}
 
 /// <summary>
 /// Constructor

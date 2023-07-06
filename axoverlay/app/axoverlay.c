@@ -36,6 +36,7 @@
 #include <stdint.h>
 
 #include "imgprovider.h"
+#include "flood/FloodDepth.h"
 
 #define PALETTE_VALUE_RANGE 255.0
 
@@ -46,6 +47,8 @@ static gint overlay_id_text = -1;
 static gint counter = 10;
 static gint top_color = 1;
 static gint bottom_color = 3;
+static gint camera_height = 0;
+static gint camera_width = 0;
 ImgProvider_t* provider = NULL;
 
 /***** Drawing functions *****************************************************/
@@ -291,6 +294,7 @@ update_overlay_cb(gpointer user_data)
   VdoBuffer* buffer = getLastFrameBlocking(provider);
   uint8_t* yuv = (uint8_t*) vdo_buffer_get_data(buffer);
   // Do something with yuv
+  float depth = Depth(yuv, camera_width, camera_height);
   returnFrame(provider, buffer);
 
   // Countdown
@@ -386,8 +390,6 @@ main(int argc, char **argv)
 {
   GError *error = NULL;
   GError *error_text = NULL;
-  gint camera_height = 0;
-  gint camera_width = 0;
 
   openlog(NULL, LOG_PID, LOG_USER);
 
