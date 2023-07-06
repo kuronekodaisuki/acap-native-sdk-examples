@@ -1,6 +1,5 @@
 #include <opencv2/calib3d.hpp>
 #include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
 #include "Marker.h"
@@ -94,7 +93,7 @@ bool Marker::Detect(cv::Mat& image)
         _markerCorner[2] = cv::Point(markerCorners[i][2]);
         _markerCorner[3] = cv::Point(markerCorners[i][3]);
         cv::fillPoly(image, _markerCorner, BLACK);
-        
+
 //#ifdef DRAW_AXIS
         cv::aruco::drawAxis(image, _cameraMatrix, _distCoeffs, rvec, tvec, 0.1f);
 //#endif
@@ -116,7 +115,7 @@ cv::Vec3b Marker::Pixel(cv::Mat& image, cv::Point3f pos, int i)
     std::vector<cv::Point3f> points{ pos };
     std::vector<cv::Point2f> projectedPoints;
     cv::projectPoints(points, _rvecs[i], _tvecs[i], _cameraMatrix, _distCoeffs, projectedPoints);
-    
+
     cv::Vec3b pixel = image.at<cv::Vec3b>(projectedPoints[0]);
     //cv::circle(image, projectedPoints[0], 3, BLACK, 2);
 

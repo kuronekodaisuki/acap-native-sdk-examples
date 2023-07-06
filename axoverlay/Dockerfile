@@ -109,35 +109,31 @@ RUN if [ "$ARCH" = armv7hf ]; then \
 #-------------------------------------------------------------------------------
 
 WORKDIR /opt/app
+COPY ./AXIS_Q6215-LE.xml config/
 COPY ./app .
 RUN mkdir lib && \
     cp -P ${OPENCV_BUILD_DIR}/lib/lib*.so* ./lib/
 
-#-------------------------------------------------------------------------------
-# Finally build the ACAP application
-#-------------------------------------------------------------------------------
-#COPY ./SnowMeasurement SnowMeasurement
-COPY ./AXIS_Q6215-LE.xml config/
-#WORKDIR /opt/app/SnowMeasurement
 #
 # build SnowMeasurement library
 #
-#RUN . /opt/axis/acapsdk/environment-setup* && \
-#    cmake \
-#        -D CMAKE_CXX_COMPILER=${CXX%-g++*}-g++ \
-#        -D CMAKE_CXX_FLAGS="${CXX#*-g++}" \
-#        -D CMAKE_C_COMPILER=${CC%-gcc*}-gcc \
-#        -D CMAKE_C_FLAGS="${CC#*-gcc}" \
-#        -D OPENCV_INCLUDE_DIR=$SDK_LIB_PATH_BASE/include/opencv4 \
-#        -D OPENCV_LIBRARIES=$SDK_LIB_PATH_BASE/lib \
-#        .
+WORKDIR /opt/app/flood
+RUN . /opt/axis/acapsdk/environment-setup* && \
+    cmake \
+        -D CMAKE_CXX_COMPILER=${CXX%-g++*}-g++ \
+        -D CMAKE_CXX_FLAGS="${CXX#*-g++}" \
+        -D CMAKE_C_COMPILER=${CC%-gcc*}-gcc \
+        -D CMAKE_C_FLAGS="${CC#*-gcc}" \
+        -D OPENCV_INCLUDE_DIR=$SDK_LIB_PATH_BASE/include/opencv4 \
+        -D OPENCV_LIBRARIES=$SDK_LIB_PATH_BASE/lib \
+        .
 
-#
-# Build Library
-#
-#RUN make -j 8;
-#RUN cp lib*.* ../lib/
+RUN make -j 8;
+RUN cp lib*.* ../lib/
 
+#-------------------------------------------------------------------------------
+# Finally build the ACAP application
+#-------------------------------------------------------------------------------
 # Building the ACAP application
 COPY ./app /opt/app/
 WORKDIR /opt/app
