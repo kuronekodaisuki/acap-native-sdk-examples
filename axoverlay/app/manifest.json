@@ -4,13 +4,14 @@
         "setup": {
             "friendlyName": "axoverlay",
             "appName": "axoverlay",
-            "vendor": "Axis Communications",
+            "vendor": "CyberAgent",
             "embeddedSdkVersion": "3.0",
             "user": {
                 "group": "sdk",
                 "username": "sdk"
             },
             "vendorUrl": "https://www.axis.com",
+            "runOptions": "/usr/local/packages/axoverlay/config/AXIS_Q6215-LE.xml",
             "runMode": "never",
             "version": "1.0.0"
         }
