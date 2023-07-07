@@ -1,0 +1,5 @@
+----- Contents of SYSTEM_LOG for 'axoverlay' -----
+
+
+2023-07-07T11:15:19.930+09:00 axis-b8a44f6b8c83 [ INFO    ] axoverlay[22603]: /usr/local/packages/axoverlay/axoverlay: error while loading shared libraries: libopencv_aruco.so.4.5: cannot open shared object file: No such file or directory
+
