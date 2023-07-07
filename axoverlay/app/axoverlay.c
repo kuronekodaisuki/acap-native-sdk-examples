@@ -493,8 +493,15 @@ main(int argc, char **argv)
   // Start animation timer
   animation_timer = g_timeout_add_seconds(1, update_overlay_cb, NULL);
 
+  if (2 <= argc)
+  {
+    if (!Initialize(argv[1], camera_width, camera_height))
+      syslog(LOG_ERR, "Failed to initialize with:%s", argv[1]);
+  }
   // Enter main loop
   g_main_loop_run(main_loop);
+
+  Release();
 
   // Destroy the overlay
   axoverlay_destroy_overlay(overlay_id, &error);

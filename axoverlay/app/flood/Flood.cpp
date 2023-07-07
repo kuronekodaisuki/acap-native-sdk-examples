@@ -20,16 +20,39 @@ const cv::Scalar RED(0, 0, 255);
 const cv::Scalar YELLOW(0, 255, 255);
 const cv::Scalar BLACK(0, 0, 0);
 
+static Flood* flood = nullptr;
+
+cv::Mat bgr;
+cv::Mat hsv;
+
+extern "C"
+bool Initialize(const char* filename, int width, int height)
+{
+    bgr = Mat(height, width, CV_8UC3);
+    flood = new Flood();
+    return flood->LoadCameraParameters(filename);
+}
+
+extern "C"
+void Release()
+{
+  if (flood != nullptr)
+    delete flood;
+  flood = nullptr;
+}
 
 extern "C"
 float Depth(uint8_t* yuv, int width, int height)
 {
-    Mat bgr = Mat(height, width, CV_8UC3);
-    Mat nv12 = Mat(height * 3 / 2, width, CV_8UC1, yuv);
-
+    cv::Mat nv12 = Mat(height * 3 / 2, width, CV_8UC1, yuv);
     // Convert the NV12 data to BGR
     cvtColor(nv12, bgr, COLOR_YUV2BGR_NV12, 3);
+    cvtColor(bgr, hsv, COLOR_BGR2HSV);
 
+    if (flood != nullptr && flood->Detect(bgr))
+    {
+      flood->Scan(hsv);
+    }
     return 0;
 }
 
@@ -38,7 +61,7 @@ float Depth(uint8_t* yuv, int width, int height)
 /// </summary>
 /// <param name="type">type of marker</param>
 /// <param name="size">marker size</param>
-Flood::Flood(TYPE type, float size):  Marker(type, size)
+Flood::Flood(float size, TYPE type):  Marker(type, size)
 {
     // 検出領域(座標系はY軸が上方向)
     _scanArea.push_back(cv::Point3f(-HEIGHT / 2, WIDTH / 2 - OFFSET, 0));         // 左上

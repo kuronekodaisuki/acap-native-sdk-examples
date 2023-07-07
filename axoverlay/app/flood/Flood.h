@@ -5,7 +5,7 @@
 class Flood : public Marker
 {
 public:
-	Flood(TYPE type, float size);
+	Flood(float size = 0.15f, TYPE type = TYPE::MARKER_6X6);
 
 	bool Detect(cv::Mat& image);
 
