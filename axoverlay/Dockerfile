@@ -18,8 +18,7 @@ ARG BUILD_DIR=/opt/build
 # Install build dependencies for cross compiling OpenCV
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update && apt-get install -y -f --no-install-recommends \
-    cmake \
-    libcairomm-1.0-dev && \
+    cmake && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -109,7 +108,6 @@ RUN if [ "$ARCH" = armv7hf ]; then \
 #-------------------------------------------------------------------------------
 
 WORKDIR /opt/app
-COPY ./AXIS_Q6215-LE.xml config/
 COPY ./app .
 RUN mkdir lib && \
     cp -P ${OPENCV_BUILD_DIR}/lib/lib*.so* ./lib/
@@ -134,8 +132,7 @@ RUN cp lib*.* ../lib/
 #-------------------------------------------------------------------------------
 # Finally build the ACAP application
 #-------------------------------------------------------------------------------
-# Building the ACAP application
-COPY ./app /opt/app/
+
 WORKDIR /opt/app
 RUN . /opt/axis/acapsdk/environment-setup* && acap-build .\
     -a 'config/AXIS_Q6215-LE.xml'
